@@ -151,23 +151,24 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 85 "./src/parser.y"
+#line 110 "./src/parser.y"
 
-        int number;
-        double numberf;
-        char *string;
-	struct {
-     		char *tipo;
-    		int value;
-    		double dvalue;
-    		char *text;
+	int number;
+	double numberf;
+	char *string;
+	struct 
+	{
+		char *type;
+		int value;
+		double dvalue;
+		char *text;
  		int booleanCond;
 		struct ast *a;
 		struct flow *f;
 		struct fncall *fun;
-  		} snum;
+	} snum;
 
-#line 171 "./src/y.tab.h"
+#line 172 "./src/y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

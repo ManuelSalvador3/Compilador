@@ -6,13 +6,23 @@
 #include <math.h>
 #include "symtab.h"
 #include "AST.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+
+#define RED   "\x1B[31m"
+#define GRN   "\x1B[32m"
+#define YEL   "\x1B[35m"
+#define BLU   "\x1B[34m"
+#define RESET "\x1B[0m"
 
 extern FILE *yyin;
 extern FILE *yyout;
 
 int globalError =0;
-int globalContadorNum =0;
-int globalContadorOper =0;
+int globalNumCounter =0;
+int globalOpCounter =0;
 int globalBoolCond = 0;
 char globalSignCond;
 char *globalType;
@@ -22,7 +32,7 @@ char *globalType;
 
 add_SymNum ( char *sym_name, int sym_val, char *sym_type ) 
 {  
-	symrec *s;
+	symbolRec *s;
    	s = getsymNum (sym_name,sym_val);
    	if (s == 0)
 	{
@@ -37,7 +47,7 @@ add_SymNum ( char *sym_name, int sym_val, char *sym_type )
 
 Update_SymNum( char *sym_name, int sym_val )
 { 
-	symrec *act;
+	symbolRec *act;
 
   	if ( getsymNum( sym_name, sym_val ) == 0 ) 
 	{
@@ -55,7 +65,7 @@ Update_SymNum( char *sym_name, int sym_val )
 
 add_SymText ( char *sym_name, char *sym_text, char *sym_type ) 
 {  
-	symrec *s;
+	symbolRec *s;
    	s = getsymText (sym_name,sym_text);
    	if (s == 0)
 	{
@@ -70,7 +80,7 @@ add_SymText ( char *sym_name, char *sym_text, char *sym_type )
 
 Update_SymText( char *sym_name, char *sym_text  )
 { 
-	symrec *act;
+	symbolRec *act;
   	if ( getsymText( sym_name, sym_text ) == 0 )
 	{
      	printf( "The variable %s it's not found\n", sym_name, sym_text );
@@ -103,7 +113,7 @@ Update_SymText( char *sym_name, char *sym_text  )
 	char *string;
 	struct 
 	{
-		char *tipo;
+		char *type;
 		int value;
 		double dvalue;
 		char *text;
@@ -121,15 +131,15 @@ Update_SymText( char *sym_name, char *sym_text  )
 
 comp: body 
 {
-	printf("FINISH -- ALL OK\n"); 
+	printf(YEL"FINISH "RESET" -- ALL "GRN"OK"RESET"\n"); 
 };
 
 body: initproc expression endproc;
 
 
-initproc: PROCEDURE var_name IS    { printf("START OF THE PROCEDURE -- \n\n");   };
+initproc: PROCEDURE var_name IS    { printf(BLU"START OF THE PROCEDURE "RESET"-- \n\n");   };
 
-endproc: END func_name SEMI_COLUMN { printf("--- \n END OF THE PROCEDURE \n\n"); };
+endproc: END func_name SEMI_COLUMN { printf("--- \n"BLU"END OF THE PROCEDURE "RESET"\n\n"); };
 
 var_name: IDENTIFIER 
 {
@@ -142,11 +152,12 @@ func_name: IDENTIFIER
 
 	if (strcmp($1, getvalsymText("Name")) == 0) 
 	{
-		printf("The names at the beginning and the end are the same --> CORRECT\n");
+		printf("The names at the beginning and the end are the same --> ");
+		printf(GRN " CORRECT\n" RESET);
 	} 
 	else
 	{
-		printf("The names at the beginning and the end are NOT the same --> ERROR \n");
+		printf("The names at the beginning and the end are NOT the same --> "RED"ERROR"RESET" \n");
 	}
 };
 
@@ -154,7 +165,7 @@ expression: statements  beginning  sentence {}
 ;
 
 
-beginning: START {printf("###########################\n BEGIN \n###########################\n\n");}
+beginning: START {printf("###########################\n "YEL"BEGIN"RESET" \n###########################\n\n");}
 ;
 
 
@@ -162,7 +173,7 @@ statements: statements  statement
 	| statement 
 ;
 
-statement: IDENTIFIER COLUMN tipo SEMI_COLUMN 
+statement: IDENTIFIER COLUMN type SEMI_COLUMN 
 { 
 	printf("The variable %s gets defined \n", $1);
 	$$.text = $1; add_SymText ( $$.text, $$.text, globalType);
@@ -170,21 +181,21 @@ statement: IDENTIFIER COLUMN tipo SEMI_COLUMN
 ;
 
 
-tipo: INTEGER {
+type: INTEGER {
 			globalType= "interger";
-			printf("A variable of type Integer it's defined\n");
+			printf(YEL"A variable of type Integer is defined\n"RESET);
 		}
        |FLOAT {
 			globalType= "float";
-			printf("A variable of type Float it's defined\n");
+			printf(YEL"A variable of type Float is defined\n"RESET);
 		}
        |STRING {
 			globalType= "string";
-			printf("A variable of type String it's defined\n");
+			printf(YEL"A variable of type String is defined\n"RESET);
 		}
        |BOOLEAN {
 			globalType= "boolean";
-			printf("A variable of type Boolean it's defined\n");
+			printf(YEL"A variable of type Boolean is defined\n"RESET);
 		}	
 ;
 
@@ -201,8 +212,8 @@ expr: IDENTIFIER  COL_EQUAL calc SEMI_COLUMN {
  		fprintf(yyout, ".text\n");
 		textOper($3.a);
  		fprintf(yyout, "..............................................\n");
-		globalContadorNum =0;
-		globalContadorOper =0;
+		globalNumCounter =0;
+		globalOpCounter =0;
 		globalBoolCond =0;
 	}
 
@@ -216,11 +227,14 @@ expr: IDENTIFIER  COL_EQUAL calc SEMI_COLUMN {
 	{ 
 		if (!getvalsymText($$.text)) 
 		{
-			printf("The variable %s has not been defined --> ERROR \n", $$.text);
+			printf("The variable %s has not been defined -->" RED " ERROR \n" RESET, $$.text);
+			printf(RED"\nERROR"RESET" -- Referencing of undefined variable.");
+			printf("\nExiting with "RED"errors."RESET"\n");
+		exit(1);
 		}
 		else
 		{
-			printf("The variable %s has already been defined --> CORRECT \n", $$.text);
+			printf("The variable %s has already been defined -->" GRN " CORRECT \n" RESET, $$.text);
 	 		add_SymNum($1, eval($3.a), globalType);
 			Update_SymNum( $1, eval($3.a) ); 
 			printf("RESULT OF %s equals to %4.4g \n\n", $1, eval($3.a));
@@ -232,9 +246,10 @@ expr: IDENTIFIER  COL_EQUAL calc SEMI_COLUMN {
 	}
 
 }
-| if_sentence {
+| if_sentence 
+{
 	//fprintf(yyout, "Sentencia IF\n");
-	globalContadorNum = 0;
+	globalNumCounter = 0;
 	//printf("IFFFFFO\n");
 	//textOper($1.a);
 
@@ -249,7 +264,8 @@ expr: IDENTIFIER  COL_EQUAL calc SEMI_COLUMN {
 ;
 
 
-if_sentence: IF calc THEN  sentence  ENDIF SEMI_COLUMN {
+if_sentence: IF calc THEN  sentence  ENDIF SEMI_COLUMN 
+{
 	//$$.f = newflow('I', $2.f , $5.f, NULL); 
 	//fprintf(yyout, "IFFFFFFFFF\n");
 	fprintf(yyout, "..............................................\n");
@@ -258,13 +274,14 @@ if_sentence: IF calc THEN  sentence  ENDIF SEMI_COLUMN {
 	fprintf(yyout, ".text\n");
 	textIf(globalSignCond,$2.f);
 	fprintf(yyout, "..............................................\n");
-	globalContadorNum =0;
-	globalContadorOper =0;
+	globalNumCounter =0;
+	globalOpCounter =0;
 	globalBoolCond =0;
 
 }
 
-| IF calc THEN  sentence  ELSE  sentence  ENDIF SEMI_COLUMN { 
+| IF calc THEN  sentence  ELSE  sentence  ENDIF SEMI_COLUMN 
+{ 
 	//$$.f = newflow('I', $2.f, $5.f, $9.f); 
 	fprintf(yyout, "..............................................\n");
 	fprintf(yyout, ".data\n");
@@ -272,329 +289,370 @@ if_sentence: IF calc THEN  sentence  ENDIF SEMI_COLUMN {
 	fprintf(yyout, ".text\n");
 	textIf(globalSignCond,$2.f);
 	fprintf(yyout, "..............................................\n");
-	globalContadorNum =0;
-	globalContadorOper =0;
+	globalNumCounter =0;
+	globalOpCounter =0;
 	globalBoolCond =0;
 }
 ;
 
 /*ARBOL*/
-calc:  calc ADD calc { 
-	//printf("ADD ON\n");
-	globalContadorOper = globalContadorOper + 1;
+calc:  calc ADD calc 
+{ 
+	//printf("ADD ON of\n");
+	globalOpCounter = globalOpCounter + 1;
 
-	if (globalError ==0) { //No hay errores //comprobación de tipos
-		if (($1.tipo == "interger") && ($3.tipo == "interger")) {
+	if (!globalError)
+	{
+		if (($1.type == "interger") && ($3.type == "interger")) 
+		{
 			$$.a = newast('+', $1.a,$3.a); 
 			evalprint($$.a);
-			globalType = $1.tipo;
-			contadorOperadores(globalContadorOper, $$.a);
-			printf("ADD ON of %s type \n", $$.tipo);
+			globalType = $1.type;
+			opCounter(globalOpCounter, $$.a);
+			printf(YEL"ADD ON of %s type \n" RESET, $$.type);
 		} 
-		else if (($1.tipo == "real") && ($3.tipo == "real")){
+		else if (($1.type == "real") && ($3.type == "real"))
+		{
 			$$.a = newast('+', $1.a,$3.a); 
 			evalprint($$.a);
-			globalType = $1.tipo;
-			contadorOperadores(globalContadorOper, $$.a);
-			printf("ADD ON of %s type\n", $$.tipo);
+			globalType = $1.type;
+			opCounter(globalOpCounter, $$.a);
+			printf(YEL"ADD ON of %s type\n"RESET,  $$.type);
 		} 
-		else if (($1.tipo == "string")){
+		else if (($1.type == "string"))
+		{
 			$$.a = newast('+', $1.a,$3.a); 
 			evalprint($$.a);
-			globalType = $3.tipo;
-			contadorOperadores(globalContadorOper, $$.a);
-			printf("ADD ON of %s type \n", $$.tipo);
+			globalType = $3.type;
+			opCounter(globalOpCounter, $$.a);
+			printf(YEL"ADD ON of %s type \n" RESET, $$.type);
 		} 
-		else if (($3.tipo == "string")){
+		else if (($3.type == "string"))
+		{
 			$$.a = newast('+', $1.a,$3.a); 
 			evalprint($$.a);
-			globalType = $1.tipo;
-			contadorOperadores(globalContadorOper, $$.a);
-			printf("ADD ON of %s type \n", $$.tipo);
+			globalType = $1.type;
+			opCounter(globalOpCounter, $$.a);
+			printf(YEL"ADD ON of %s type \n" RESET, $$.type);
 		}
-		else if (($3.tipo == "string") && ($1.tipo == "string")){
+		else if (($3.type == "string") && ($1.type == "string"))
+		{
 			$$.a = newast('+', $1.a,$3.a); 
 			evalprint($$.a);
-			globalType = $1.tipo;
-			contadorOperadores(globalContadorOper, $$.a);
-			printf("ADD ON of %s type \n", $$.tipo);
-		}
-
-	} else {
-		printf("THERE ARE ERRORS --> THE ADD ON GETS CANCELLED\n");
-
-	}
-
-}
-	|  calc SUBS calc { 
-		//printf("SUBTRACTION \n");
-		globalContadorOper = globalContadorOper + 1;
-
-		if (globalError ==0) { //No hay errores
-			if (($1.tipo == "interger") && ($3.tipo == "interger")) {
-				$$.a = newast('-', $1.a,$3.a); 
-				evalprint($$.a);
-				contadorOperadores(globalContadorOper, $$.a);
-
-				printf("SUBTRACTION of %s type \n", $$.tipo);
-			} 
-			else if (($1.tipo == "real") && ($3.tipo == "real")){
-				$$.a = newast('-', $1.a,$3.a); 
-				evalprint($$.a);
-				contadorOperadores(globalContadorOper, $$.a);
-
-				printf("SUBTRACTION of %s type \n", $$.tipo);
-			} 
-			else if (($1.tipo == "string")){
-				$$.a = newast('-', $1.a,$3.a); 
-				evalprint($$.a);
-				contadorOperadores(globalContadorOper, $$.a);
-
-				printf("SUBTRACTION of %s type \n", $$.tipo);
-			} 
-			else if (($3.tipo == "string")){
-				$$.a = newast('-', $1.a,$3.a); 
-				evalprint($$.a);
-				contadorOperadores(globalContadorOper, $$.a);
-
-				printf("SUBTRACTION of %s type \n", $$.tipo);
-			}
-			else if (($3.tipo == "string") && ($1.tipo == "string")){
-				$$.a = newast('-', $1.a,$3.a); 
-				evalprint($$.a);
-				globalType = $1.tipo;
-				contadorOperadores(globalContadorOper, $$.a);
-
-				printf("SUBTRACTION of %s type \n", $$.tipo);
-
-
-			}
-		}  else {
-			printf("THERE ARE ERRORS --> THE SUBTRACTION GETS CANCELLED\n");
-
-		}
-
-	}
-	|  calc MULT calc { 
-		//printf("MULTIPLICATION\n");
-		globalContadorOper = globalContadorOper + 1;
-
-		if (globalError ==0) { //No hay errores
-			if (($1.tipo == "interger") && ($3.tipo == "interger")) {
-				$$.a = newast('*', $1.a,$3.a); 
-				evalprint($$.a);
-				contadorOperadores(globalContadorOper, $$.a);
-
-				printf("MULTIPLICATION of %s type \n", $$.tipo);
-			} 
-			else if (($1.tipo == "real") && ($3.tipo == "real")){
-				$$.a = newast('*', $1.a,$3.a); 
-				evalprint($$.a);
-				contadorOperadores(globalContadorOper, $$.a);
-
-				printf("MULTIPLICATION of %s type \n", $$.tipo);
-			} 
-			else if (($1.tipo == "string")){
-				$$.a = newast('*', $1.a,$3.a); 
-				evalprint($$.a);
-				contadorOperadores(globalContadorOper, $$.a);
-
-				printf("MULTIPLICATION of %s type \n", $$.tipo);
-
-
-			} 
-			else if (($3.tipo == "string")){
-				$$.a = newast('*', $1.a,$3.a); 
-				evalprint($$.a);
-				contadorOperadores(globalContadorOper, $$.a);
-
-				printf("MULTIPLICATION of %s type \n", $$.tipo);
-			}
-			else if (($3.tipo == "string") && ($1.tipo == "string")){
-				$$.a = newast('*', $1.a,$3.a); 
-				evalprint($$.a);
-				contadorOperadores(globalContadorOper, $$.a);
-
-				globalType = $1.tipo;
-				printf("MULTIPLICATION of %s type \n", $$.tipo);
-
-
-			}
-		} else {
-			printf("THERE ARE ERRORS --> THE MULTIPLICATION GETS CANCELLED \n");
-
-		}
-
-	}
-
-	|   calc DIV calc {
-		//printf("DIVISION \n");
-		globalContadorOper = globalContadorOper + 1;
-
-		if ($3.value == 0) { //No se puede dividir entre 0
-			globalError =1;
-		}
-
-		if (globalError ==0) { //No hay errores
-			if (($1.tipo == "interger") && ($3.tipo == "interger")) {
-				$$.a = newast('/', $1.a,$3.a); 
-				evalprint($$.a);
-				contadorOperadores(globalContadorOper, $$.a);
-
-				printf("DIVISION of %s type \n", $$.tipo);
-			} 
-			else if (($1.tipo == "real") && ($3.tipo == "real")){
-				$$.a = newast('/', $1.a,$3.a); 
-				evalprint($$.a);
-				contadorOperadores(globalContadorOper, $$.a);
-
-				printf("DIVISION of %s type \n", $$.tipo);
-			} 
-			else if (($1.tipo == "string")){
-				$$.a = newast('/', $1.a,$3.a); 
-				evalprint($$.a);
-				contadorOperadores(globalContadorOper, $$.a);
-
-				printf("DIVISION of %s type \n", $$.tipo);
-
-
-			} 
-			else if (($3.tipo == "string")){
-				$$.a = newast('/', $1.a,$3.a);
-				evalprint($$.a);
-				contadorOperadores(globalContadorOper, $$.a);
-
-				printf("DIVISION of %s type \n", $$.tipo);
-
-			}
-			else if (($3.tipo == "string") && ($1.tipo == "string")){
-				$$.a = newast('/', $1.a,$3.a); 
-				evalprint($$.a);
-				globalType = $1.tipo;
-				contadorOperadores(globalContadorOper, $$.a);
-
-				//printf("DIVISION of %s type \n", $$.tipo);
-			}
-		}else {
-			printf("THERE ARE ERRORS --> THE DIVISION GETS CANCELLED\n");
-		}
-
-	}
-
-
-	| calc BIG_THAN calc {
-		printf("\n BIGGER THAN condition\n");
-		globalBoolCond = 1;
-
-		if ($1.value > $3.value) {
-			$$.booleanCond =1;
-			$$.f = $$.booleanCond ;
-			globalSignCond = '>';
-
-			printf("Condition BIGGER THAN is correct - Is bigger\n");
-
-
-		
-		} else {
-			$$.booleanCond =0;
-			$$.f = $$.booleanCond;
-			globalSignCond = '>';
-
-			printf("Condition BIGGER THAN is not correct - It's not bigger \n");
-
-		
+			globalType = $1.type;
+			opCounter(globalOpCounter, $$.a);
+			printf(YEL"ADD ON of %s type \n" RESET, $$.type);
 		}
 
 	} 
-	| calc LES_THAN calc {
-		printf("LESS THAN condition\n");
-		globalBoolCond = 1;
-			if ($1.value < $3.value) {
-				$$.booleanCond =1;
-				$$.f = $$.booleanCond;
-				globalSignCond = '<';
-
-
-				printf("Condition LESS THAN is correct - It's smaller\n");
-
-		
-			} else {
-				$$.booleanCond =0;
-				$$.f = $$.booleanCond;
-				globalSignCond = '<';
-
-				printf("Condition LESS THAN is NOT correct - It's not smaller\n");
-
-			}
-
-
+	else 
+	{
+		printf("THERE ARE "RED"ERRORS"RESET" --> THE ADD ON GETS CANCELLED\n");
 	}
-	| calc EQUALS calc {
-		printf("EQUALS condition\n");
-		globalBoolCond = 1;
 
-		if ($1.value == $3.value) {
-			printf("Condition EQUALS is correct - It's equal\n");
-			$$.booleanCond = 1;
-			$$.f = $$.booleanCond;
-			globalSignCond = '=';
+}
+|  calc SUBS calc 
+{ 
+	//printf("SUBTRACTION \n");
+	globalOpCounter = globalOpCounter + 1;
 
-		
-		} else {
-			printf("Condition EQUALS is NOT correct - It's equal\n");
-			$$.booleanCond = 0;
-			$$.f = $$.booleanCond;
-			globalSignCond = '=';
-		
+	if (!globalError) 
+	{
+		if (($1.type == "interger") && ($3.type == "interger")) 
+		{
+			$$.a = newast('-', $1.a,$3.a); 
+			evalprint($$.a);
+			opCounter(globalOpCounter, $$.a);
+
+			printf(YEL"SUBTRACTION of %s type \n"RESET, $$.type);
+		} 
+		else if (($1.type == "real") && ($3.type == "real"))
+		{
+			$$.a = newast('-', $1.a,$3.a); 
+			evalprint($$.a);
+			opCounter(globalOpCounter, $$.a);
+
+			printf(YEL"SUBTRACTION of %s type \n"RESET, $$.type);
+		} 
+		else if (($1.type == "string"))
+		{
+			$$.a = newast('-', $1.a,$3.a); 
+			evalprint($$.a);
+			opCounter(globalOpCounter, $$.a);
+
+			printf(YEL"SUBTRACTION of %s type \n"RESET, $$.type);
+		} 
+		else if (($3.type == "string"))
+		{
+			$$.a = newast('-', $1.a,$3.a); 
+			evalprint($$.a);
+			opCounter(globalOpCounter, $$.a);
+
+			printf(YEL"SUBTRACTION of %s type \n"RESET, $$.type);
 		}
+		else if (($3.type == "string") && ($1.type == "string"))
+		{
+			$$.a = newast('-', $1.a,$3.a); 
+			evalprint($$.a);
+			globalType = $1.type;
+			opCounter(globalOpCounter, $$.a);
 
+			printf(YEL"SUBTRACTION of %s type \n"RESET, $$.type);
+
+
+		}
+	} 
+	else 
+	{
+		printf("THERE ARE ERRORS --> THE SUBTRACTION GETS CANCELLED\n");
 	}
 
-	| INTEGERNUM { $$.a = newnum($1);
-		$$.value = $1;
-		$$.tipo = "interger";
-		globalContadorNum = globalContadorNum +1;
-		contadorNumeros(globalContadorNum, $$.value );
-	}
+}
 
-	| REALNUM {
-		$$.a= newnum($1);
-		$$.dvalue = $1; $$.tipo = "real";
+|  calc MULT calc 
+{ 
+	//printf("MULTIPLICATION\n");
+	globalOpCounter = globalOpCounter + 1;
+
+	if (globalError ==0) 
+	{ 
+		if (($1.type == "interger") && ($3.type == "interger"))
+		{
+			$$.a = newast('*', $1.a,$3.a); 
+			evalprint($$.a);
+			opCounter(globalOpCounter, $$.a);
+
+			printf(YEL"MULTIPLICATION of %s type \n"RESET, $$.type);
+		} 
+		else if (($1.type == "real") && ($3.type == "real"))
+		{
+			$$.a = newast('*', $1.a,$3.a); 
+			evalprint($$.a);
+			opCounter(globalOpCounter, $$.a);
+
+			printf(YEL"MULTIPLICATION of %s type \n"RESET, $$.type);
+		} 
+		else if (($1.type == "string"))
+		{
+			$$.a = newast('*', $1.a,$3.a); 
+			evalprint($$.a);
+			opCounter(globalOpCounter, $$.a);
+
+			printf(YEL"MULTIPLICATION of %s type \n"RESET, $$.type);
+		} 
+		else if (($3.type == "string"))
+		{
+			$$.a = newast('*', $1.a,$3.a); 
+			evalprint($$.a);
+			opCounter(globalOpCounter, $$.a);
+
+			printf(YEL"MULTIPLICATION of %s type \n"RESET, $$.type);
+		}
+		else if (($3.type == "string") && ($1.type == "string"))
+		{
+			$$.a = newast('*', $1.a,$3.a); 
+			evalprint($$.a);
+			opCounter(globalOpCounter, $$.a);
+
+			globalType = $1.type;
+			printf(YEL"MULTIPLICATION of %s type \n"RESET, $$.type);
 
 
-	}
-	| IDENTIFIER {
-		//printf("variable\n");
-		$$.tipo = "string";
-
-		if (getvalsymText($1) == 0 ) {
-			globalError = 1;
-			printf("The variable %s does NOT exist \n", $1);
-
-		} else {
-			globalError = 0;
-			$$.value = getvalsymNum($1);
-			$$.a= newnum($$.value);
-			globalContadorNum = globalContadorNum +1;
-			contadorNumeros(globalContadorNum, $$.value );
-
-			printf("The variable %s does exist \n", $1);		
 		}
 	}
+	else
+	{
+		printf("THERE ARE "RED"ERRORS"RESET" --> THE MULTIPLICATION GETS CANCELLED \n");
+	}
+
+}
+
+|  calc DIV calc {
+	//printf("DIVISION \n");
+	globalOpCounter = globalOpCounter + 1;
+
+	if (!$3.value)	
+	{ 
+		printf(RED "\nERROR" RESET, 30);
+		printf(" - Can't divide by 0. \n", 30);
+		exit(1);
+		globalError = 1;
+	}
+
+	if (!globalError) 
+	{ 
+		if (($1.type == "interger") && ($3.type == "interger"))
+		{
+			$$.a = newast('/', $1.a,$3.a); 
+			evalprint($$.a);
+			opCounter(globalOpCounter, $$.a);
+
+			printf(YEL"DIVISION of %s type \n"RESET, $$.type);
+		} 
+		else if (($1.type == "real") && ($3.type == "real"))
+		{
+			$$.a = newast('/', $1.a,$3.a); 
+			evalprint($$.a);
+			opCounter(globalOpCounter, $$.a);
+
+			printf(YEL"DIVISION of %s type \n"RESET, $$.type);
+		} 
+		else if (($1.type == "string"))
+		{
+			$$.a = newast('/', $1.a,$3.a); 
+			evalprint($$.a);
+			opCounter(globalOpCounter, $$.a);
+
+			printf(YEL"DIVISION of %s type \n"RESET, $$.type);
+
+
+		} 
+		else if (($3.type == "string"))
+		{
+			$$.a = newast('/', $1.a,$3.a);
+			evalprint($$.a);
+			opCounter(globalOpCounter, $$.a);
+
+			printf(YEL"DIVISION of %s type \n"RESET, $$.type);
+
+		}
+		else if (($3.type == "string") && ($1.type == "string"))
+		{
+			$$.a = newast('/', $1.a,$3.a); 
+			evalprint($$.a);
+			globalType = $1.type;
+			opCounter(globalOpCounter, $$.a);
+
+			//printf(YEL"DIVISION of %s type \n"RESET, $$.type);
+		}
+	}
+	else 
+	{
+		printf("THERE ARE "RED"ERRORS"RESET" --> THE DIVISION GETS CANCELLED\n");
+	}
+
+}
+
+
+| calc BIG_THAN calc 
+{
+	printf(YEL"\nBIGGER THAN condition\n" RESET);
+	globalBoolCond = 1;
+
+	if ($1.value > $3.value) {
+		$$.booleanCond = 1;
+		$$.f = $$.booleanCond;
+		globalSignCond = '>';
+
+		printf("Condition BIGGER THAN is true - Is bigger\n");
+	}
+	else 
+	{
+		$$.booleanCond =0;
+		$$.f = $$.booleanCond;
+		globalSignCond = '>';
+
+		printf("Condition BIGGER THAN is false - It's not bigger \n");
+	}
+
+} 
+| calc LES_THAN calc {
+	printf(YEL "\NLESS THAN condition.\n" RESET);
+	globalBoolCond = 1;
+	if ($1.value < $3.value) 
+	{
+		$$.booleanCond =1;
+		$$.f = $$.booleanCond;
+		globalSignCond = '<';
+
+
+		printf("Condition LESS THAN is true - It's smaller\n");
+	}
+	else 
+	{
+		$$.booleanCond = 0;
+		$$.f = $$.booleanCond;
+		globalSignCond = '<';
+
+		printf( "Condition LESS THAN is false - It's not smaller\n");
+	}
+}
+| calc EQUALS calc {
+	printf(YEL "EQUALS condition\n" RESET);
+	globalBoolCond = 1;
+
+	if ($1.value == $3.value) 
+	{
+		printf("Condition EQUALS is true - It's equal\n");
+		$$.booleanCond = 1;
+		$$.f = $$.booleanCond;
+		globalSignCond = '=';
+	}
+	else
+	{
+		printf("Condition EQUALS is false - It's equal\n");
+		$$.booleanCond = 0;
+		$$.f = $$.booleanCond;
+		globalSignCond = '=';
+	}
+
+}
+
+| INTEGERNUM 
+{ 
+	$$.a = newnum($1);
+	$$.value = $1;
+	$$.type = "interger";
+	globalNumCounter = globalNumCounter +1;
+	contadorNumeros(globalNumCounter, $$.value );
+}
+
+| REALNUM 
+{
+	$$.a= newnum($1);
+	$$.dvalue = $1; $$.type = "real";
+}
+
+| IDENTIFIER 
+{
+	//printf("variable\n");
+	$$.type = "string";
+
+	if (!getvalsymText($1))
+	{
+		globalError = 1;
+		printf("The variable %s does NOT exist \n", $1);
+
+	} 
+	else 
+	{
+		globalError = 0;
+		$$.value = getvalsymNum($1);
+		$$.a= newnum($$.value);
+		globalNumCounter = globalNumCounter +1;
+		contadorNumeros(globalNumCounter, $$.value );
+
+		printf("The variable %s does exist \n", $1);		
+	}
+}
 ;
 
 
-function: FUNCTION nombreFuncion LEFT_P statements RIGHT_P RETURN tipo IS  START  sentence  Fun  END SEMI_COLUMN {
+function: FUNCTION nombreFuncion LEFT_P statements RIGHT_P RETURN type IS NEWLINE START NEWLINE sentence NEWLINE Fun NEWLINE END SEMI_COLUMN {
 	//$$.fun = newfunc($4.fun, $11.fun);
 }
 ;
 
-nombreFuncion: IDENTIFIER {
-	if (getvalsymNum($1) == 0 ) {
+nombreFuncion: IDENTIFIER
+{
+	if (!getvalsymNum($1))
+	{
 		add_SymNum($1, 1 , "string");
-		printf("No function has the same name ---> CORRECT\n");		
-	} else {
-		printf("There is a function with that name --> ERROR\n");		
+		printf("No function has the same name ---> "GRN" CORRECT"RESET"\n");		
+	}
+	else 
+	{
+		printf("There is a function with that name --> "RED" ERROR\n"RESET"");		
 	}
 	//fprintf(yyout, "Name function\n");
 }  
@@ -602,44 +660,52 @@ nombreFuncion: IDENTIFIER {
 
 Fun: RETURN IDENTIFIER {
 
-	if (getvalsymText($2) == 0 ) {
+	if (!getvalsymText($2))
+	{
 		printf("The variable %s has not been defined \n", $2);
-	} else {
+		printf(RED"\nERROR"RESET" -- Referencing of undefined variable.");
+		printf("\nExiting with "RED"errors."RESET"\n");
+		exit(1);
+	} 
+	else 
+	{
 		printf("It has at least one return\n");
-		if (strcmp(globalType, gettypesymText($2)) == 0) {
-			printf("The return type is corret -->CORRECT\n");		
-		} else {
-			printf("The return type doesn't equals the function type --> ERROR\n");		
+		if (strcmp(globalType, gettypesymText($2)) == 0) 
+		{
+			printf("The return type is corret --> "GRN" CORRECT "RESET" \n");		
+		}
+		else
+		{
+			printf("The return type doesn't equals the function type --> "RED" ERROR "RESET"\n");		
 		}
 	}
 } 
 ;
 
 
-
-factor: INTEGERNUM //{fprintf(yyout, "  factor--> INTEGERNUM(%d)\n", $1);}
-	| REALNUM //{fprintf(yyout, "  factor--> REALNUM(%f)\n"), $1;}
-	|IDENTIFIER //{fprintf(yyout, "  factor --> variable(%s)\n", $1);}
-	|TRUE //{fprintf(yyout, "  factor --> True\n");}
-	|FALSE //{fprintf(yyout, "  factor --> False\n");}
+factor: INTEGERNUM 	//{ fprintf(yyout, "  factor --> INTEGERNUM(%d)\n", $1);}
+	| REALNUM 		//{ fprintf(yyout, "  factor --> REALNUM(%f)\n"), $1; 	}
+	| IDENTIFIER 	//{ fprintf(yyout, "  factor --> variable(%s)\n", $1); 	}
+	| TRUE 			//{ fprintf(yyout, "  factor --> True\n"); 				}
+	| FALSE 		//{ fprintf(yyout, "  factor --> False\n"); 			}
 ;
 
 
-while_loop: WHILE calc LOOP  sentence  ENDLOOP SEMI_COLUMN { 
-		//$$.f = newflow('W', $2.f, $4.f, NULL);  
- 		//fprintf(yyout, "WHILEEEEEE\n");
-		//printf("while\n");
- 		fprintf(yyout, "..............................................\n");
- 		fprintf(yyout, ".data\n");
-		dataOper($2.f);
- 		fprintf(yyout, ".text\n");
-		textWhile(globalSignCond, $$.f);
-		globalContadorNum =0;
-		globalContadorOper =0;
-		globalBoolCond =0;
+while_loop: WHILE calc LOOP sentence  ENDLOOP SEMI_COLUMN 
+{ 
+	//$$.f = newflow('W', $2.f, $4.f, NULL);  
+	//fprintf(yyout, "WHILEEEEEE\n");
+	//printf("while\n");
+	fprintf(yyout, "..............................................\n");
+	fprintf(yyout, ".data\n");
+	dataOper($2.f);
+	fprintf(yyout, ".text\n");
+	textWhile(globalSignCond, $$.f);
+	globalNumCounter = 0;
+	globalOpCounter = 0;
+	globalBoolCond = 0;
 
- 		fprintf(yyout, "..............................................\n");
-
+	fprintf(yyout, "..............................................\n");
 }
 ;
 
@@ -651,15 +717,55 @@ rangos: factor RANGE factor //{fprintf(yyout, "Variable\n");}
 
 
 %%
-int main(int argc, char *argv[]) {
 
-	if (argc == 1) {
+int file_isreg(const char *path)
+{
+    struct stat st;
+
+    if (stat(path, &st) < 0)
+        return -1;
+
+    return S_ISREG(st.st_mode);
+}
+
+int main(int argc, char *argv[])
+{
+
+	if (argc == 1)
 		yyparse();
-	}
-	if (argc == 2) {
-		yyout = fopen( "./salidaAda.txt", "wt" );
 
-		yyin = fopen(argv[1], "rt");
+
+	if (argc >= 2)
+	{
+		if (argc == 4) 
+		{
+			if (!strcmp("-o", argv[2])) 
+			{
+				printf("Invalid argument", 30);
+				exit(1);
+			}
+
+			if (file_isreg(argv[3]) == 1) 
+				yyout = fopen(argv[3], "wt");
+			else 
+			{
+				printf(RED "\nERROR" RESET, 30);
+				printf("- Can't open output file. \n");
+				exit(1);
+			}
+		}
+		else 
+		{
+			yyout = fopen("./out.asm", "wt");
+		}
+		if (file_isreg(argv[1]) == 1)
+			yyin = fopen(argv[1], "rt");
+		else 
+		{
+			printf(RED "\nERROR" RESET, 30);
+			printf("- Can't open input file. \n");
+			exit(1);
+		}
 
 		yyparse();
 	}

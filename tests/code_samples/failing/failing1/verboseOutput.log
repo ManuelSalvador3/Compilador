@@ -1,0 +1,43 @@
+The variable Name it's not defined, it gets defined with the value Prueba1 and of string type 
+
+[34mSTART OF THE PROCEDURE [0m-- 
+
+[35mA variable of type Integer is defined
+[0mThe variable integer1 gets defined 
+The variable integer1 it's not defined, it gets defined with the value integer1 and of interger type 
+
+[35mA variable of type Integer is defined
+[0mThe variable integer2 gets defined 
+The variable integer2 it's not defined, it gets defined with the value integer2 and of interger type 
+
+[35mA variable of type Integer is defined
+[0mThe variable integer3 gets defined 
+The variable integer3 it's not defined, it gets defined with the value integer3 and of interger type 
+
+[35mA variable of type Integer is defined
+[0mThe variable integer4 gets defined 
+The variable integer4 it's not defined, it gets defined with the value integer4 and of interger type 
+
+###########################
+ [35mBEGIN[0m 
+###########################
+
+[35mADD ON of interger type 
+[0mThe variable integer1 has already been defined -->[32m CORRECT 
+[0mThe variable integer1 it's already defined, with the value 44 and of the type interger 
+The variable integer1 values now equals to 44
+RESULT OF integer1 equals to   44 
+
+The variable integer2 has already been defined -->[32m CORRECT 
+[0mThe variable integer2 it's already defined, with the value 40 and of the type interger 
+The variable integer2 values now equals to 40
+RESULT OF integer2 equals to   40 
+
+[35mMULTIPLICATION of interger type 
+[0mThe variable integer3 has already been defined -->[32m CORRECT 
+[0mThe variable integer3 it's already defined, with the value 5 and of the type interger 
+The variable integer3 values now equals to 5
+RESULT OF integer3 equals to    5 
+
+[31m
+ERROR[0m - Can't divide by 0. 

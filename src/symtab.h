@@ -1,48 +1,48 @@
 
 
-struct symrec {
+struct symbolRec {
   char *name;             /* name of symbol          */
   int *num;               /* val of symbol          */
   char *text;             /* text of symbol          */
   char *type;             /* type of symbol          */
-  struct symrec *next;    /* link field              */
+  struct symbolRec *next;    /* link field              */
 
 };
 
-typedef struct symrec symrec;
+typedef struct symbolRec symbolRec;
 
-symrec *sym_table = (symrec *)0;
+symbolRec *sym_table = (symbolRec *)0;
 
-symrec *putsymNum ();
+symbolRec *putsymNum ();
 
-symrec *getsymNum ();
+symbolRec *getsymNum ();
 
-symrec *putsymText ();
+symbolRec *putsymText ();
 
-symrec *getsymText ();
+symbolRec *getsymText ();
 
 //-----------NUMBERS-------------
 
-symrec * putsymNum ( char *sym_name, int sym_val, char *sym_type ) {
+symbolRec * putsymNum ( char *sym_name, int sym_val, char *sym_type ) {
   //printf("AÑADIR: %s ... %d ...||||| ", sym_name, sym_val);
 
-  symrec *ptr;
-  ptr = (symrec *) malloc (sizeof(symrec));
+  symbolRec *ptr;
+  ptr = (symbolRec *) malloc (sizeof(symbolRec));
   ptr->name = (char *) malloc (strlen(sym_name)+1);
   ptr->num = (int) malloc ((sym_val)+1);
   ptr->type = (char *) malloc (strlen(sym_type)+1);
   strcpy (ptr->name,sym_name);
   ptr->num = sym_val;
   strcpy (ptr->type, sym_type);
-  ptr->next = (struct symrec *)sym_table;
+  ptr->next = (struct symbolRec *)sym_table;
   sym_table = ptr;
   return ptr;
 }
 
-symrec * getsymNum ( char *sym_name, int sym_val) {
-  symrec *ptr;
-  for (ptr = sym_table; ptr != (symrec *) 0;
-       ptr = (symrec *)ptr->next)
+symbolRec * getsymNum ( char *sym_name, int sym_val) {
+  symbolRec *ptr;
+  for (ptr = sym_table; ptr != (symbolRec *) 0;
+       ptr = (symbolRec *)ptr->next)
     if (strcmp (ptr->name,sym_name) == 0) {
 
         sym_val = ptr->num;
@@ -53,10 +53,10 @@ symrec * getsymNum ( char *sym_name, int sym_val) {
   return 0;
 }
 
-symrec * updatesymNum ( char *sym_name, int sym_val) {
-  symrec *ptr;
-  for (ptr = sym_table; ptr != (symrec *) 0;
-       ptr = (symrec *)ptr->next)
+symbolRec * updatesymNum ( char *sym_name, int sym_val) {
+  symbolRec *ptr;
+  for (ptr = sym_table; ptr != (symbolRec *) 0;
+       ptr = (symbolRec *)ptr->next)
     if (strcmp (ptr->name,sym_name) == 0) {
  	ptr->num = sym_val;
 	//printf("update %s ... %d ...||||| ", ptr->name, ptr->num );
@@ -65,10 +65,10 @@ symrec * updatesymNum ( char *sym_name, int sym_val) {
   return 0;
 }
 
-symrec * getvalsymNum ( char *sym_name ) {
-  symrec *ptr;
-  for (ptr = sym_table; ptr != (symrec *) 0;
-       ptr = (symrec *)ptr->next)
+symbolRec * getvalsymNum ( char *sym_name ) {
+  symbolRec *ptr;
+  for (ptr = sym_table; ptr != (symbolRec *) 0;
+       ptr = (symbolRec *)ptr->next)
     if (strcmp (ptr->name,sym_name) == 0) {
 	//printf("get val of %s ... %d ...||||| ", ptr->name, ptr->num);
         return ptr->num;
@@ -80,11 +80,11 @@ symrec * getvalsymNum ( char *sym_name ) {
 
 //-----------TEXT-------------
 
-symrec * putsymText ( char *sym_name, char *sym_text, char *sym_type  ) {
+symbolRec * putsymText ( char *sym_name, char *sym_text, char *sym_type  ) {
   //printf("AÑADIR: %s ... %s ...||||| ", sym_name, sym_text);
 
-  symrec *ptr;
-  ptr = (symrec *) malloc (sizeof(symrec));
+  symbolRec *ptr;
+  ptr = (symbolRec *) malloc (sizeof(symbolRec));
   ptr->name = (char *) malloc (strlen(sym_name)+1);
   ptr->text = (char *) malloc (strlen(sym_name)+1);
   ptr->type = (char *) malloc (strlen(sym_type)+1);
@@ -92,15 +92,15 @@ symrec * putsymText ( char *sym_name, char *sym_text, char *sym_type  ) {
   strcpy (ptr->text,sym_text);
   strcpy (ptr->type, sym_type);
 
-  ptr->next = (struct symrec *)sym_table;
+  ptr->next = (struct symbolRec *)sym_table;
   sym_table = ptr;
   return ptr;
 }
 
-symrec * getsymText ( char *sym_name, char *sym_text) {
-  symrec *ptr;
-  for (ptr = sym_table; ptr != (symrec *) 0;
-       ptr = (symrec *)ptr->next)
+symbolRec * getsymText ( char *sym_name, char *sym_text) {
+  symbolRec *ptr;
+  for (ptr = sym_table; ptr != (symbolRec *) 0;
+       ptr = (symbolRec *)ptr->next)
     if (strcmp (ptr->name,sym_name) == 0) {
         sym_text = ptr->text;
 	sym_name = ptr->name;
@@ -110,10 +110,10 @@ symrec * getsymText ( char *sym_name, char *sym_text) {
   return 0;
 }
 
-symrec * updatesymText ( char *sym_name, char *sym_text) {
-  symrec *ptr;
-  for (ptr = sym_table; ptr != (symrec *) 0;
-       ptr = (symrec *)ptr->next)
+symbolRec * updatesymText ( char *sym_name, char *sym_text) {
+  symbolRec *ptr;
+  for (ptr = sym_table; ptr != (symbolRec *) 0;
+       ptr = (symbolRec *)ptr->next)
     if (strcmp (ptr->name,sym_name) == 0) {
  	ptr->text = sym_text;
 	//printf("update %s ... %s ...||||| ", ptr->name, ptr->text );
@@ -122,10 +122,10 @@ symrec * updatesymText ( char *sym_name, char *sym_text) {
   return 0;
 }
 
-symrec * getvalsymText ( char *sym_name ) {
-  symrec *ptr;
-  for (ptr = sym_table; ptr != (symrec *) 0;
-       ptr = (symrec *)ptr->next)
+symbolRec * getvalsymText ( char *sym_name ) {
+  symbolRec *ptr;
+  for (ptr = sym_table; ptr != (symbolRec *) 0;
+       ptr = (symbolRec *)ptr->next)
     if (strcmp (ptr->name,sym_name) == 0) {
 	//printf("get val of %s ... %s ...||||| ", ptr->name, ptr->text);
         return ptr->text;
@@ -133,17 +133,13 @@ symrec * getvalsymText ( char *sym_name ) {
   return 0;
 }
 
-symrec * gettypesymText ( char *sym_name ) {
-  symrec *ptr;
-  for (ptr = sym_table; ptr != (symrec *) 0;
-       ptr = (symrec *)ptr->next)
+symbolRec * gettypesymText ( char *sym_name ) {
+  symbolRec *ptr;
+  for (ptr = sym_table; ptr != (symbolRec *) 0;
+       ptr = (symbolRec *)ptr->next)
     if (strcmp (ptr->name,sym_name) == 0) {
 	//printf("get type of %s ... %s ...||||| ", ptr->name, ptr->type);
         return ptr->type;
     }
   return 0;
 }
-
-
-
-

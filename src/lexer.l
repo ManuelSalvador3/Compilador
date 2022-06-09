@@ -56,6 +56,7 @@ symbolchar [a-zA-Z_\.]
 "function"	return FUNCTION;
 "return"	return RETURN;
 
+[ \n]+ return NEWLINE;
 
 {character}({character}|{digit})* yylval.string=strdup(yytext); return IDENTIFIER; 
 {symbolchar}+ return IDENTIFICADORSYMB; 
