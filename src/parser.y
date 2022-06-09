@@ -638,7 +638,7 @@ calc:  calc ADD calc
 ;
 
 
-function: FUNCTION nombreFuncion LEFT_P statements RIGHT_P RETURN type IS NEWLINE START NEWLINE sentence NEWLINE Fun NEWLINE END SEMI_COLUMN {
+function: FUNCTION nombreFuncion LEFT_P statements RIGHT_P RETURN type IS START sentence Fun END SEMI_COLUMN {
 	//$$.fun = newfunc($4.fun, $11.fun);
 }
 ;

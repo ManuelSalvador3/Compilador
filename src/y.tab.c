@@ -1910,7 +1910,7 @@ yyreduce:
 
   case 39: /* function: FUNCTION nombreFuncion LEFT_P statements RIGHT_P RETURN type IS START sentence Fun END SEMI_COLUMN  */
 #line 641 "./src/parser.y"
-                                                                                                                 {
+                                                                                                             {
 	//$$.fun = newfunc($4.fun, $11.fun);
 }
 #line 1917 "./src/y.tab.c"
