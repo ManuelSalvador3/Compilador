@@ -148,7 +148,9 @@ add_SymText ( char *sym_name, char *sym_text, char *sym_type )
    	}
 	else 
 	{
-        printf( "The variable %s is already defined, it is of type %s \n\n", sym_name, sym_text, sym_type );
+		printf(RED"\nERROR"RESET" -- The variable %s is already defined, it is of type %s \n\n", sym_name, sym_type );
+		printf("\nExiting with "RED"errors."RESET"\n");
+		exit(1);
    	}
 }
 
@@ -168,7 +170,7 @@ Update_SymText( char *sym_name, char *sym_text  )
 
 
 
-#line 172 "./src/y.tab.c"
+#line 174 "./src/y.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -653,11 +655,11 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,   136,   136,   142,   145,   147,   149,   155,   170,   174,
-     178,   179,   182,   190,   194,   198,   202,   208,   209,   212,
-     255,   261,   262,   263,   264,   265,   266,   270,   283,   299,
-     354,   412,   470,   537,   559,   577,   598,   607,   613,   638,
-     643,   658,   683,   684,   685,   686,   687,   691,   709,   712
+       0,   138,   138,   144,   147,   149,   151,   157,   171,   175,
+     179,   180,   183,   191,   195,   199,   203,   209,   210,   213,
+     253,   258,   259,   260,   261,   262,   263,   267,   280,   294,
+     331,   369,   407,   453,   475,   493,   514,   523,   529,   553,
+     558,   572,   597,   598,   599,   600,   601,   605,   620,   623
 };
 #endif
 
@@ -1304,38 +1306,37 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* comp: body  */
-#line 137 "./src/parser.y"
+#line 139 "./src/parser.y"
 {
 	printf(YEL"FINISH "RESET" -- ALL "GRN"OK"RESET"\n"); 
 	compiling_ok = 1;
 }
-#line 1313 "./src/y.tab.c"
+#line 1315 "./src/y.tab.c"
     break;
 
   case 4: /* initproc: PROCEDURE var_name IS  */
-#line 145 "./src/parser.y"
+#line 147 "./src/parser.y"
                                    { printf(BLU"START OF THE PROCEDURE "RESET"-- \n\n");   }
-#line 1319 "./src/y.tab.c"
+#line 1321 "./src/y.tab.c"
     break;
 
   case 5: /* endproc: END func_name SEMI_COLUMN  */
-#line 147 "./src/parser.y"
+#line 149 "./src/parser.y"
                                    { printf("--- \n"BLU"END OF THE PROCEDURE "RESET"\n\n"); }
-#line 1325 "./src/y.tab.c"
+#line 1327 "./src/y.tab.c"
     break;
 
   case 6: /* var_name: IDENTIFIER  */
-#line 150 "./src/parser.y"
+#line 152 "./src/parser.y"
 {
 	add_SymText ( "Name", (yyvsp[0].string), "string" );
 }
-#line 1333 "./src/y.tab.c"
+#line 1335 "./src/y.tab.c"
     break;
 
   case 7: /* func_name: IDENTIFIER  */
-#line 156 "./src/parser.y"
+#line 158 "./src/parser.y"
 {
-
 	if (strcmp((yyvsp[0].string), getvalsymText("Name")) == 0) 
 	{
 		printf("The names at the beginning and the end are the same --> ");
@@ -1347,84 +1348,81 @@ yyreduce:
 		exit(1);
 	}
 }
-#line 1351 "./src/y.tab.c"
+#line 1352 "./src/y.tab.c"
     break;
 
   case 8: /* expression: statements beginning sentence  */
-#line 170 "./src/parser.y"
+#line 171 "./src/parser.y"
                                             {}
-#line 1357 "./src/y.tab.c"
+#line 1358 "./src/y.tab.c"
     break;
 
   case 9: /* beginning: START  */
-#line 174 "./src/parser.y"
+#line 175 "./src/parser.y"
                  {printf("###########################\n "YEL"BEGIN"RESET" \n###########################\n\n");}
-#line 1363 "./src/y.tab.c"
+#line 1364 "./src/y.tab.c"
     break;
 
   case 12: /* statement: IDENTIFIER COLUMN type SEMI_COLUMN  */
-#line 183 "./src/parser.y"
+#line 184 "./src/parser.y"
 { 
 	printf("The variable %s gets defined \n", (yyvsp[-3].string));
 	(yyval.snum).text = (yyvsp[-3].string); add_SymText ( (yyval.snum).text, (yyval.snum).text, globalType);
 }
-#line 1372 "./src/y.tab.c"
+#line 1373 "./src/y.tab.c"
     break;
 
   case 13: /* type: INTEGER  */
-#line 190 "./src/parser.y"
+#line 191 "./src/parser.y"
               {
 			globalType= " integer";
 			printf(YEL"A variable of type Integer is defined\n"RESET);
 		}
-#line 1381 "./src/y.tab.c"
+#line 1382 "./src/y.tab.c"
     break;
 
   case 14: /* type: FLOAT  */
-#line 194 "./src/parser.y"
+#line 195 "./src/parser.y"
               {
 			globalType= "float";
 			printf(YEL"A variable of type Float is defined\n"RESET);
 		}
-#line 1390 "./src/y.tab.c"
+#line 1391 "./src/y.tab.c"
     break;
 
   case 15: /* type: STRING  */
-#line 198 "./src/parser.y"
+#line 199 "./src/parser.y"
                {
 			globalType= "string";
 			printf(YEL"A variable of type String is defined\n"RESET);
 		}
-#line 1399 "./src/y.tab.c"
+#line 1400 "./src/y.tab.c"
     break;
 
   case 16: /* type: BOOLEAN  */
-#line 202 "./src/parser.y"
+#line 203 "./src/parser.y"
                 {
 			globalType= "boolean";
 			printf(YEL"A variable of type Boolean is defined\n"RESET);
 		}
-#line 1408 "./src/y.tab.c"
+#line 1409 "./src/y.tab.c"
     break;
 
   case 19: /* expr: IDENTIFIER COL_EQUAL calc SEMI_COLUMN  */
-#line 212 "./src/parser.y"
+#line 213 "./src/parser.y"
                                              {
 	if (globalBoolCond == 0) {
-		globalBoolCond =0;
- 		fprintf(yyout, "_____________________\n");
+		globalBoolCond = 0;
+ 		fprintf(yyout, "\n");
  		fprintf(yyout, ".data\n");
 		dataOper((yyvsp[-1].snum).a);
  		fprintf(yyout, ".text\n");
 		textOper((yyvsp[-1].snum).a);
- 		fprintf(yyout, "_____________________\n");
-		globalNumCounter =0;
-		globalOpCounter =0;
-		globalBoolCond =0;
+ 		fprintf(yyout, "\n");
+		globalNumCounter = 0;
+		globalOpCounter  = 0;
+		globalBoolCond   = 0;
 	}
-
-
-	//printf("Condicion: %d \n", $$.booleanCond);
 
 
 	(yyval.snum).text= (yyvsp[-3].string);
@@ -1436,7 +1434,7 @@ yyreduce:
 			printf("The variable %s has not been defined -->" RED " ERROR \n" RESET, (yyval.snum).text);
 			printf(RED"\nERROR"RESET" -- Referencing of undefined variable.");
 			printf("\nExiting with "RED"errors."RESET"\n");
-		exit(1);
+			exit(1);
 		}
 		else
 		{
@@ -1452,91 +1450,88 @@ yyreduce:
 	}
 
 }
-#line 1456 "./src/y.tab.c"
+#line 1454 "./src/y.tab.c"
     break;
 
   case 20: /* expr: if_sentence  */
-#line 256 "./src/parser.y"
+#line 254 "./src/parser.y"
 {
 	globalNumCounter = 0;
-	//printf("Llego 1");
 }
-#line 1465 "./src/y.tab.c"
+#line 1462 "./src/y.tab.c"
     break;
 
   case 21: /* expr: PUTLINE LEFTP_COM IDENTIFIER RIGHTP_COM SEMI_COLUMN  */
-#line 261 "./src/parser.y"
+#line 258 "./src/parser.y"
                                                         { printf("Put_Line\n");   }
-#line 1471 "./src/y.tab.c"
+#line 1468 "./src/y.tab.c"
     break;
 
   case 22: /* expr: IDENTIFIER COL_EQUAL factor SEMI_COLUMN  */
-#line 262 "./src/parser.y"
+#line 259 "./src/parser.y"
                                                                         { printf("Asignacion\n"); }
-#line 1477 "./src/y.tab.c"
+#line 1474 "./src/y.tab.c"
     break;
 
   case 23: /* expr: LINE_COMMENT  */
-#line 263 "./src/parser.y"
+#line 260 "./src/parser.y"
                 { printf("COMMENT \n");		 }
-#line 1483 "./src/y.tab.c"
+#line 1480 "./src/y.tab.c"
     break;
 
   case 24: /* expr: while_loop  */
-#line 264 "./src/parser.y"
+#line 261 "./src/parser.y"
                 { printf("WHILE LOOP \n\n"); }
-#line 1489 "./src/y.tab.c"
+#line 1486 "./src/y.tab.c"
     break;
 
   case 25: /* expr: for_loop  */
-#line 265 "./src/parser.y"
-                { printf("FOR LOOP \n\n");	 }
-#line 1495 "./src/y.tab.c"
+#line 262 "./src/parser.y"
+                        { printf("FOR LOOP \n\n");	 }
+#line 1492 "./src/y.tab.c"
     break;
 
   case 26: /* expr: function  */
-#line 266 "./src/parser.y"
+#line 263 "./src/parser.y"
                         { printf("FUNCTION \n\n");	 }
-#line 1501 "./src/y.tab.c"
+#line 1498 "./src/y.tab.c"
     break;
 
   case 27: /* if_sentence: IF calc THEN sentence ENDIF SEMI_COLUMN  */
-#line 271 "./src/parser.y"
+#line 268 "./src/parser.y"
 {
-	fprintf(yyout, "_____________________\n");
+	fprintf(yyout, "\n");
 	fprintf(yyout, ".data\n");
 	dataOper((yyvsp[-4].snum).a);
 	fprintf(yyout, ".text\n");
 	textIf(globalSignCond,(yyvsp[-4].snum).f);
-	fprintf(yyout, "_____________________\n");
+	fprintf(yyout, "\n");
 	globalNumCounter = 0;
 	globalOpCounter  = 0;
 	globalBoolCond   = 0;
 }
-#line 1517 "./src/y.tab.c"
+#line 1514 "./src/y.tab.c"
     break;
 
   case 28: /* if_sentence: IF calc THEN sentence ELSE sentence ENDIF SEMI_COLUMN  */
-#line 284 "./src/parser.y"
+#line 281 "./src/parser.y"
 { 
-	//$$.f = newflow('I', $2.f, $5.f, $9.f); 
-	fprintf(yyout, "_____________________\n");
+	fprintf(yyout, "\n");
 	fprintf(yyout, ".data\n");
 	dataOper((yyvsp[-6].snum).a);
 	fprintf(yyout, ".text\n");
 	textIf(globalSignCond,(yyvsp[-6].snum).f);
-	fprintf(yyout, "_____________________\n");
-	globalNumCounter =0;
-	globalOpCounter =0;
-	globalBoolCond =0;
+	fprintf(yyout, "\n");
+	globalNumCounter = 0;
+	globalOpCounter  = 0;
+	globalBoolCond 	 = 0;
 }
-#line 1534 "./src/y.tab.c"
+#line 1530 "./src/y.tab.c"
     break;
 
   case 29: /* calc: calc ADD calc  */
-#line 300 "./src/parser.y"
+#line 295 "./src/parser.y"
 { 
-	//printf("ADD ON of\n");
 	globalOpCounter = globalOpCounter + 1;
 
 	if (!globalError)
@@ -1557,31 +1552,14 @@ yyreduce:
 			opCounter(globalOpCounter, (yyval.snum).a);
 			printf(YEL"ADD ON of %s type\n"RESET,  (yyval.snum).type);
 		} 
-		else if (((yyvsp[-2].snum).type == "string"))
+		else if (((yyvsp[-2].snum).type == "string") || ((yyvsp[0].snum).type == "string"))
 		{
-			(yyval.snum).a = newast('+', (yyvsp[-2].snum).a,(yyvsp[0].snum).a); 
-			evalprint((yyval.snum).a);
-			globalType = (yyvsp[0].snum).type;
-			opCounter(globalOpCounter, (yyval.snum).a);
-			printf(YEL"ADD ON of %s type \n" RESET, (yyval.snum).type);
-		} 
-		else if (((yyvsp[0].snum).type == "string"))
-		{
-			(yyval.snum).a = newast('+', (yyvsp[-2].snum).a,(yyvsp[0].snum).a); 
-			evalprint((yyval.snum).a);
-			globalType = (yyvsp[-2].snum).type;
-			opCounter(globalOpCounter, (yyval.snum).a);
-			printf(YEL"ADD ON of %s type \n" RESET, (yyval.snum).type);
-		}
-		else if (((yyvsp[0].snum).type == "string") && ((yyvsp[-2].snum).type == "string"))
-		{
-			(yyval.snum).a = newast('+', (yyvsp[-2].snum).a,(yyvsp[0].snum).a); 
-			evalprint((yyval.snum).a);
-			globalType = (yyvsp[-2].snum).type;
-			opCounter(globalOpCounter, (yyval.snum).a);
-			printf(YEL"ADD ON of %s type \n" RESET, (yyval.snum).type);
-		}
+			printf(RED "\nERROR" RESET, 30);
+			printf(" - ADDING on %s type is not allowed.\n", (yyval.snum).type, 30);
+			printf("\nExiting with "RED"errors."RESET"\n");
 
+			exit(1);
+		} 
 	} 
 	else 
 	{
@@ -1589,13 +1567,12 @@ yyreduce:
 	}
 
 }
-#line 1593 "./src/y.tab.c"
+#line 1571 "./src/y.tab.c"
     break;
 
   case 30: /* calc: calc SUBS calc  */
-#line 355 "./src/parser.y"
+#line 332 "./src/parser.y"
 { 
-	//printf("SUBTRACTION \n");
 	globalOpCounter = globalOpCounter + 1;
 
 	if (!globalError) 
@@ -1616,33 +1593,14 @@ yyreduce:
 
 			printf(YEL"SUBTRACTION of %s type \n"RESET, (yyval.snum).type);
 		} 
-		else if (((yyvsp[-2].snum).type == "string"))
+		else if (((yyvsp[-2].snum).type == "string") || ((yyvsp[0].snum).type == "string"))
 		{
-			(yyval.snum).a = newast('-', (yyvsp[-2].snum).a,(yyvsp[0].snum).a); 
-			evalprint((yyval.snum).a);
-			opCounter(globalOpCounter, (yyval.snum).a);
+			printf(RED "\nERROR" RESET, 30);
+			printf(" - SUBTRACTION on %s type is not allowed.\n", (yyval.snum).type, 30);
+			printf("\nExiting with "RED"errors."RESET"\n");
 
-			printf(YEL"SUBTRACTION of %s type \n"RESET, (yyval.snum).type);
+			exit(1);
 		} 
-		else if (((yyvsp[0].snum).type == "string"))
-		{
-			(yyval.snum).a = newast('-', (yyvsp[-2].snum).a,(yyvsp[0].snum).a); 
-			evalprint((yyval.snum).a);
-			opCounter(globalOpCounter, (yyval.snum).a);
-
-			printf(YEL"SUBTRACTION of %s type \n"RESET, (yyval.snum).type);
-		}
-		else if (((yyvsp[0].snum).type == "string") && ((yyvsp[-2].snum).type == "string"))
-		{
-			(yyval.snum).a = newast('-', (yyvsp[-2].snum).a,(yyvsp[0].snum).a); 
-			evalprint((yyval.snum).a);
-			globalType = (yyvsp[-2].snum).type;
-			opCounter(globalOpCounter, (yyval.snum).a);
-
-			printf(YEL"SUBTRACTION of %s type \n"RESET, (yyval.snum).type);
-
-
-		}
 	} 
 	else 
 	{
@@ -1650,16 +1608,15 @@ yyreduce:
 	}
 
 }
-#line 1654 "./src/y.tab.c"
+#line 1612 "./src/y.tab.c"
     break;
 
   case 31: /* calc: calc MULT calc  */
-#line 413 "./src/parser.y"
+#line 370 "./src/parser.y"
 { 
-	//printf("MULTIPLICATION\n");
 	globalOpCounter = globalOpCounter + 1;
 
-	if (globalError ==0) 
+	if (globalError == 0) 
 	{ 
 		if (((yyvsp[-2].snum).type == " integer") && ((yyvsp[0].snum).type == " integer"))
 		{
@@ -1677,33 +1634,14 @@ yyreduce:
 
 			printf(YEL"MULTIPLICATION of %s type \n"RESET, (yyval.snum).type);
 		} 
-		else if (((yyvsp[-2].snum).type == "string"))
+		else if (((yyvsp[-2].snum).type == "string") || ((yyvsp[0].snum).type == "string"))
 		{
-			(yyval.snum).a = newast('*', (yyvsp[-2].snum).a,(yyvsp[0].snum).a); 
-			evalprint((yyval.snum).a);
-			opCounter(globalOpCounter, (yyval.snum).a);
+			printf(RED "\nERROR" RESET, 30);
+			printf(" - MULTIPLICATION on %s type is not allowed.\n", (yyval.snum).type, 30);
+			printf("\nExiting with "RED"errors."RESET"\n");
 
-			printf(YEL"MULTIPLICATION of %s type \n"RESET, (yyval.snum).type);
+			exit(1);
 		} 
-		else if (((yyvsp[0].snum).type == "string"))
-		{
-			(yyval.snum).a = newast('*', (yyvsp[-2].snum).a,(yyvsp[0].snum).a); 
-			evalprint((yyval.snum).a);
-			opCounter(globalOpCounter, (yyval.snum).a);
-
-			printf(YEL"MULTIPLICATION of %s type \n"RESET, (yyval.snum).type);
-		}
-		else if (((yyvsp[0].snum).type == "string") && ((yyvsp[-2].snum).type == "string"))
-		{
-			(yyval.snum).a = newast('*', (yyvsp[-2].snum).a,(yyvsp[0].snum).a); 
-			evalprint((yyval.snum).a);
-			opCounter(globalOpCounter, (yyval.snum).a);
-
-			globalType = (yyvsp[-2].snum).type;
-			printf(YEL"MULTIPLICATION of %s type \n"RESET, (yyval.snum).type);
-
-
-		}
 	}
 	else
 	{
@@ -1711,13 +1649,12 @@ yyreduce:
 	}
 
 }
-#line 1715 "./src/y.tab.c"
+#line 1653 "./src/y.tab.c"
     break;
 
   case 32: /* calc: calc DIV calc  */
-#line 470 "./src/parser.y"
+#line 407 "./src/parser.y"
                  {
-	//printf("DIVISION \n");
 	globalOpCounter = globalOpCounter + 1;
 
 	if (!(yyvsp[0].snum).value)	
@@ -1746,33 +1683,13 @@ yyreduce:
 
 			printf(YEL"DIVISION of %s type \n"RESET, (yyval.snum).type);
 		} 
-		else if (((yyvsp[-2].snum).type == "string"))
+		else if (((yyvsp[-2].snum).type == "string") || ((yyvsp[0].snum).type == "string"))
 		{
-			(yyval.snum).a = newast('/', (yyvsp[-2].snum).a,(yyvsp[0].snum).a); 
-			evalprint((yyval.snum).a);
-			opCounter(globalOpCounter, (yyval.snum).a);
+			printf(RED "\nERROR" RESET, 30);
+			printf(" - DIVISION on %s type is not allowed.\n", (yyval.snum).type, 30);
+			printf("\nExiting with "RED"errors."RESET"\n");
 
-			printf(YEL"DIVISION of %s type \n"RESET, (yyval.snum).type);
-
-
-		} 
-		else if (((yyvsp[0].snum).type == "string"))
-		{
-			(yyval.snum).a = newast('/', (yyvsp[-2].snum).a,(yyvsp[0].snum).a);
-			evalprint((yyval.snum).a);
-			opCounter(globalOpCounter, (yyval.snum).a);
-
-			printf(YEL"DIVISION of %s type \n"RESET, (yyval.snum).type);
-
-		}
-		else if (((yyvsp[0].snum).type == "string") && ((yyvsp[-2].snum).type == "string"))
-		{
-			(yyval.snum).a = newast('/', (yyvsp[-2].snum).a,(yyvsp[0].snum).a); 
-			evalprint((yyval.snum).a);
-			globalType = (yyvsp[-2].snum).type;
-			opCounter(globalOpCounter, (yyval.snum).a);
-
-			//printf(YEL"DIVISION of %s type \n"RESET, $$.type);
+			exit(1);
 		}
 	}
 	else 
@@ -1781,11 +1698,11 @@ yyreduce:
 	}
 
 }
-#line 1785 "./src/y.tab.c"
+#line 1702 "./src/y.tab.c"
     break;
 
   case 33: /* calc: calc BIG_THAN calc  */
-#line 538 "./src/parser.y"
+#line 454 "./src/parser.y"
 {
 	printf(YEL"\nBIGGER THAN condition\n" RESET);
 	globalBoolCond = 1;
@@ -1799,7 +1716,7 @@ yyreduce:
 	}
 	else 
 	{
-		(yyval.snum).booleanCond =0;
+		(yyval.snum).booleanCond = 0;
 		(yyval.snum).f = (yyval.snum).booleanCond;
 		globalSignCond = '>';
 
@@ -1807,11 +1724,11 @@ yyreduce:
 	}
 
 }
-#line 1811 "./src/y.tab.c"
+#line 1728 "./src/y.tab.c"
     break;
 
   case 34: /* calc: calc LES_THAN calc  */
-#line 559 "./src/parser.y"
+#line 475 "./src/parser.y"
                      {
 	printf(YEL "\NLESS THAN condition.\n" RESET);
 	globalBoolCond = 1;
@@ -1830,11 +1747,11 @@ yyreduce:
 		printf( "Condition LESS THAN is false - It's not smaller\n");
 	}
 }
-#line 1834 "./src/y.tab.c"
+#line 1751 "./src/y.tab.c"
     break;
 
   case 35: /* calc: calc EQUALS calc  */
-#line 577 "./src/parser.y"
+#line 493 "./src/parser.y"
                    {
 	printf(YEL "EQUALS condition\n" RESET);
 	globalBoolCond = 1;
@@ -1855,11 +1772,11 @@ yyreduce:
 	}
 
 }
-#line 1859 "./src/y.tab.c"
+#line 1776 "./src/y.tab.c"
     break;
 
   case 36: /* calc: INTEGERNUM  */
-#line 599 "./src/parser.y"
+#line 515 "./src/parser.y"
 { 
 	(yyval.snum).a = newnum((yyvsp[0].number));
 	(yyval.snum).value = (yyvsp[0].number);
@@ -1867,22 +1784,21 @@ yyreduce:
 	globalNumCounter = globalNumCounter +1;
 	contadorNumeros(globalNumCounter, (yyval.snum).value );
 }
-#line 1871 "./src/y.tab.c"
+#line 1788 "./src/y.tab.c"
     break;
 
   case 37: /* calc: REALNUM  */
-#line 608 "./src/parser.y"
+#line 524 "./src/parser.y"
 {
 	(yyval.snum).a= newnum((yyvsp[0].numberf));
 	(yyval.snum).dvalue = (yyvsp[0].numberf); (yyval.snum).type = "real";
 }
-#line 1880 "./src/y.tab.c"
+#line 1797 "./src/y.tab.c"
     break;
 
   case 38: /* calc: IDENTIFIER  */
-#line 614 "./src/parser.y"
+#line 530 "./src/parser.y"
 {
-	//printf("variable\n");
 	(yyval.snum).type = "string";
 
 	if (!getvalsymText((yyvsp[0].string)))
@@ -1902,19 +1818,19 @@ yyreduce:
 		printf("The variable %s does exist \n", (yyvsp[0].string));		
 	}
 }
-#line 1906 "./src/y.tab.c"
+#line 1822 "./src/y.tab.c"
     break;
 
   case 39: /* function: FUNCTION nombreFuncion LEFT_P statements RIGHT_P RETURN type IS START sentence Fun END SEMI_COLUMN  */
-#line 638 "./src/parser.y"
+#line 553 "./src/parser.y"
                                                                                                              {
 	//$$.fun = newfunc($4.fun, $11.fun);
 }
-#line 1914 "./src/y.tab.c"
+#line 1830 "./src/y.tab.c"
     break;
 
   case 40: /* nombreFuncion: IDENTIFIER  */
-#line 644 "./src/parser.y"
+#line 559 "./src/parser.y"
 {
 	if (!getvalsymNum((yyvsp[0].string)))
 	{
@@ -1925,13 +1841,12 @@ yyreduce:
 	{
 		printf("There is a function with that name --> "RED" ERROR\n"RESET"");		
 	}
-	//fprintf(yyout, "Name function\n");
 }
-#line 1931 "./src/y.tab.c"
+#line 1846 "./src/y.tab.c"
     break;
 
   case 41: /* Fun: RETURN IDENTIFIER  */
-#line 658 "./src/parser.y"
+#line 572 "./src/parser.y"
                        {
 
 	if (!getvalsymText((yyvsp[0].string)))
@@ -1954,16 +1869,13 @@ yyreduce:
 		}
 	}
 }
-#line 1958 "./src/y.tab.c"
+#line 1873 "./src/y.tab.c"
     break;
 
   case 47: /* while_loop: WHILE calc LOOP sentence ENDLOOP SEMI_COLUMN  */
-#line 692 "./src/parser.y"
+#line 606 "./src/parser.y"
 { 
-	//$$.f = newflow('W', $2.f, $4.f, NULL);  
-	//fprintf(yyout, "WHILEEEEEE\n");
-	//printf("while\n");
-	fprintf(yyout, "_____________________\n");
+	fprintf(yyout, "\n");
 	fprintf(yyout, ".data\n");
 	dataOper((yyvsp[-4].snum).f);
 	fprintf(yyout, ".text\n");
@@ -1972,13 +1884,13 @@ yyreduce:
 	globalOpCounter = 0;
 	globalBoolCond = 0;
 
-	fprintf(yyout, "_____________________\n");
+	fprintf(yyout, "\n");
 }
-#line 1978 "./src/y.tab.c"
+#line 1890 "./src/y.tab.c"
     break;
 
 
-#line 1982 "./src/y.tab.c"
+#line 1894 "./src/y.tab.c"
 
       default: break;
     }
@@ -2171,7 +2083,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 716 "./src/parser.y"
+#line 627 "./src/parser.y"
 
 
 int file_isreg(const char *path)
