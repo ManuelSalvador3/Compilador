@@ -4,23 +4,23 @@ procedure Prueba1 is
 	integer2:Integer;
 	integer3:Integer;
 	integer4:Integer;
-	
+	float1: Float;
 begin
 	integer1:= 4 + 40;
-   	integer2:= 40;
-	integer3:= 5 * 1;
-	integer4:= 10 / 5;
+   	integer2:= 47;
+	integer3:= 60 * 1;
+	integer4:= 10 / 0; -----Primer error, dividir por 0
+	float1 := 2,2;
 	
    	if integer3 < integer2 then
-   		integer5:=69;
+   		integer4 := 69;
    	end if;
 
-   	--> 
    	--Prueba de comentario
    	while integer1 > integer2 loop
    		integer2:= 70;   	
    	end loop;
-	integer2:= 71,3;   
-end Prueba1;
+	integer2:=  integer1 + float1;   
+end Prueba5;
 
 

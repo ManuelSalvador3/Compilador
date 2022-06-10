@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include "string.h"
 
 
 #define RED   "\x1B[31m"
@@ -16,6 +17,8 @@
 #define YEL   "\x1B[35m"
 #define BLU   "\x1B[34m"
 #define RESET "\x1B[0m"
+
+#define OUT_ARG "-o"
 
 extern FILE *yyin;
 extern FILE *yyout;
@@ -182,7 +185,7 @@ statement: IDENTIFIER COLUMN type SEMI_COLUMN
 
 
 type: INTEGER {
-			globalType= "interger";
+			globalType= " integer";
 			printf(YEL"A variable of type Integer is defined\n"RESET);
 		}
        |FLOAT {
@@ -248,11 +251,8 @@ expr: IDENTIFIER  COL_EQUAL calc SEMI_COLUMN {
 }
 | if_sentence 
 {
-	//fprintf(yyout, "Sentencia IF\n");
 	globalNumCounter = 0;
-	//printf("IFFFFFO\n");
-	//textOper($1.a);
-
+	//printf("Llego 1");
 }
 
 | PUTLINE LEFTP_COM IDENTIFIER RIGHTP_COM SEMI_COLUMN 	{ printf("Put_Line\n");   }
@@ -264,8 +264,9 @@ expr: IDENTIFIER  COL_EQUAL calc SEMI_COLUMN {
 ;
 
 
-if_sentence: IF calc THEN  sentence  ENDIF SEMI_COLUMN 
+if_sentence: IF calc THEN sentence ENDIF SEMI_COLUMN 
 {
+	//printf("LLEGADA AL 2");
 	//$$.f = newflow('I', $2.f , $5.f, NULL); 
 	//fprintf(yyout, "IFFFFFFFFF\n");
 	fprintf(yyout, "..............................................\n");
@@ -303,7 +304,7 @@ calc:  calc ADD calc
 
 	if (!globalError)
 	{
-		if (($1.type == "interger") && ($3.type == "interger")) 
+		if (($1.type == " integer") && ($3.type == " integer")) 
 		{
 			$$.a = newast('+', $1.a,$3.a); 
 			evalprint($$.a);
@@ -358,7 +359,7 @@ calc:  calc ADD calc
 
 	if (!globalError) 
 	{
-		if (($1.type == "interger") && ($3.type == "interger")) 
+		if (($1.type == " integer") && ($3.type == " integer")) 
 		{
 			$$.a = newast('-', $1.a,$3.a); 
 			evalprint($$.a);
@@ -416,7 +417,7 @@ calc:  calc ADD calc
 
 	if (globalError ==0) 
 	{ 
-		if (($1.type == "interger") && ($3.type == "interger"))
+		if (($1.type == " integer") && ($3.type == " integer"))
 		{
 			$$.a = newast('*', $1.a,$3.a); 
 			evalprint($$.a);
@@ -481,7 +482,7 @@ calc:  calc ADD calc
 
 	if (!globalError) 
 	{ 
-		if (($1.type == "interger") && ($3.type == "interger"))
+		if (($1.type == " integer") && ($3.type == " integer"))
 		{
 			$$.a = newast('/', $1.a,$3.a); 
 			evalprint($$.a);
@@ -559,17 +560,14 @@ calc:  calc ADD calc
 | calc LES_THAN calc {
 	printf(YEL "\NLESS THAN condition.\n" RESET);
 	globalBoolCond = 1;
-	if ($1.value < $3.value) 
-	{
+	if ($1.value < $3.value) {
 		$$.booleanCond =1;
 		$$.f = $$.booleanCond;
 		globalSignCond = '<';
 
 
 		printf("Condition LESS THAN is true - It's smaller\n");
-	}
-	else 
-	{
+	} else {
 		$$.booleanCond = 0;
 		$$.f = $$.booleanCond;
 		globalSignCond = '<';
@@ -602,7 +600,7 @@ calc:  calc ADD calc
 { 
 	$$.a = newnum($1);
 	$$.value = $1;
-	$$.type = "interger";
+	$$.type = " integer";
 	globalNumCounter = globalNumCounter +1;
 	contadorNumeros(globalNumCounter, $$.value );
 }
@@ -739,20 +737,14 @@ int main(int argc, char *argv[])
 	{
 		if (argc == 4) 
 		{
-			if (!strcmp("-o", argv[2])) 
-			{
-				printf("Invalid argument", 30);
-				exit(1);
-			}
-
-			if (file_isreg(argv[3]) == 1) 
+			if (!strcmp(OUT_ARG, argv[2])) 
 				yyout = fopen(argv[3], "wt");
-			else 
+			else
 			{
-				printf(RED "\nERROR" RESET, 30);
-				printf("- Can't open output file. \n");
+				printf(RED"ERROR "RESET"- Invalid argument.\n", 30);
 				exit(1);
 			}
+			
 		}
 		else 
 		{
