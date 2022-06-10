@@ -23,10 +23,11 @@
 extern FILE *yyin;
 extern FILE *yyout;
 
-int globalError =0;
-int globalNumCounter =0;
-int globalOpCounter =0;
-int globalBoolCond = 0;
+int globalError 	 = 0;
+int globalNumCounter = 0;
+int globalOpCounter  = 0;
+int globalBoolCond 	 = 0;
+int compiling_ok     = 0;
 char globalSignCond;
 char *globalType;
 
@@ -40,11 +41,11 @@ add_SymNum ( char *sym_name, int sym_val, char *sym_type )
    	if (s == 0)
 	{
         s = putsymNum (sym_name,sym_val, sym_type);
-        printf( "The variable %s it's not defined, it gets defined as %d and of the type %s \n", sym_name, sym_val, sym_type );
+        printf( "The variable %s is not defined, it gets defined as %d and of the type %s \n", sym_name, sym_val, sym_type );
    	}
 	else
 	{
-		printf( "The variable %s it's already defined, with the value %d and of the type %s \n", sym_name, sym_val, sym_type );
+		printf( "The variable %s is already defined, with the value %d and of the type %s \n", sym_name, sym_val, sym_type );
    	}
 }
 
@@ -54,7 +55,7 @@ Update_SymNum( char *sym_name, int sym_val )
 
   	if ( getsymNum( sym_name, sym_val ) == 0 ) 
 	{
-    	printf( "The variable %s it's not defined, it's %d\n", sym_name, sym_val );
+    	printf( "The variable %s is not defined, its %d\n", sym_name, sym_val );
   	}
 	else
 	{
@@ -73,11 +74,11 @@ add_SymText ( char *sym_name, char *sym_text, char *sym_type )
    	if (s == 0)
 	{
         s = putsymText (sym_name,sym_text, sym_type);
-        printf( "The variable %s it's not defined, it gets defined with the value %s and of %s type \n\n", sym_name, sym_text, sym_type );
+        printf( "The variable %s is not defined, it gets defined with the value %s and of %s type \n\n", sym_name, sym_text, sym_type );
    	}
 	else 
 	{
-        printf( "The variable %s it's already defined, it's of type %s \n\n", sym_name, sym_text, sym_type );
+        printf( "The variable %s is already defined, it is of type %s \n\n", sym_name, sym_text, sym_type );
    	}
 }
 
@@ -86,7 +87,7 @@ Update_SymText( char *sym_name, char *sym_text  )
 	symbolRec *act;
   	if ( getsymText( sym_name, sym_text ) == 0 )
 	{
-     	printf( "The variable %s it's not found\n", sym_name, sym_text );
+     	printf( "The variable %s was not found\n", sym_name, sym_text );
   	}
 	else
 	{
@@ -97,17 +98,6 @@ Update_SymText( char *sym_name, char *sym_text  )
 
 
 %}
-
-%token ADD SUBS MULT DIV LEFT_P RIGHT_P IF THEN BIG_THAN LES_THAN ELSE  PROCEDURE IS END START COLUMN INTEGER FLOAT STRING BOOLEAN IDENTIFICADORSYMB LEFTP_COM COL_EQUAL RIGHTP_COM PUTLINE ENDIF TRUE FALSE LINE_COMMENT WHILE LOOP ENDLOOP EQUALS FOR IN RANGE FUNCTION RETURN SEMI_COLUMN
-
-%left ADD SUBS
-%left MULT DIV
-
-%token <number> INTEGERNUM 
-%token <numberf> REALNUM
-%token <string> IDENTIFIER
-
-%type<snum> while_loop if_sentence func_name statement calc expr Fun function
 
 %union 
 {
@@ -127,6 +117,17 @@ Update_SymText( char *sym_name, char *sym_text  )
 	} snum;
 }
 
+%token ADD SUBS MULT DIV LEFT_P RIGHT_P IF THEN BIG_THAN LES_THAN ELSE PROCEDURE IS END START COLUMN INTEGER FLOAT STRING BOOLEAN IDENTIFICADORSYMB LEFTP_COM COL_EQUAL RIGHTP_COM PUTLINE ENDIF TRUE FALSE LINE_COMMENT WHILE LOOP ENDLOOP EQUALS FOR IN RANGE FUNCTION RETURN SEMI_COLUMN
+
+%left ADD SUBS
+%left MULT DIV
+
+%token <number> INTEGERNUM 
+%token <numberf> REALNUM
+%token <string> IDENTIFIER
+
+%type<snum> while_loop if_sentence func_name statement calc expr Fun function
+
 
 %start comp
 
@@ -135,6 +136,7 @@ Update_SymText( char *sym_name, char *sym_text  )
 comp: body 
 {
 	printf(YEL"FINISH "RESET" -- ALL "GRN"OK"RESET"\n"); 
+	compiling_ok = 1;
 };
 
 body: initproc expression endproc;
@@ -161,6 +163,7 @@ func_name: IDENTIFIER
 	else
 	{
 		printf("The names at the beginning and the end are NOT the same --> "RED"ERROR"RESET" \n");
+		exit(1);
 	}
 };
 
@@ -209,12 +212,12 @@ sentence: sentence  expr
 expr: IDENTIFIER  COL_EQUAL calc SEMI_COLUMN {
 	if (globalBoolCond == 0) {
 		globalBoolCond =0;
- 		fprintf(yyout, "..............................................\n");
+ 		fprintf(yyout, "______________________________________\n");
  		fprintf(yyout, ".data\n");
 		dataOper($3.a);
  		fprintf(yyout, ".text\n");
 		textOper($3.a);
- 		fprintf(yyout, "..............................................\n");
+ 		fprintf(yyout, "______________________________________\n");
 		globalNumCounter =0;
 		globalOpCounter =0;
 		globalBoolCond =0;
@@ -233,7 +236,7 @@ expr: IDENTIFIER  COL_EQUAL calc SEMI_COLUMN {
 			printf("The variable %s has not been defined -->" RED " ERROR \n" RESET, $$.text);
 			printf(RED"\nERROR"RESET" -- Referencing of undefined variable.");
 			printf("\nExiting with "RED"errors."RESET"\n");
-		exit(1);
+			exit(1);
 		}
 		else
 		{
@@ -252,44 +255,39 @@ expr: IDENTIFIER  COL_EQUAL calc SEMI_COLUMN {
 | if_sentence 
 {
 	globalNumCounter = 0;
-	//printf("Llego 1");
 }
 
 | PUTLINE LEFTP_COM IDENTIFIER RIGHTP_COM SEMI_COLUMN 	{ printf("Put_Line\n");   }
 | IDENTIFIER COL_EQUAL factor SEMI_COLUMN 				{ printf("Asignacion\n"); }
 | LINE_COMMENT 	{ printf("COMMENT \n");		 }
 | while_loop 	{ printf("WHILE LOOP \n\n"); }
-| bucle_for 	{ printf("FOR LOOP \n\n");	 }
+| for_loop 		{ printf("FOR LOOP \n\n");	 }
 | function 		{ printf("FUNCTION \n\n");	 }
 ;
 
 
 if_sentence: IF calc THEN sentence ENDIF SEMI_COLUMN 
 {
-	//printf("LLEGADA AL 2");
-	//$$.f = newflow('I', $2.f , $5.f, NULL); 
-	//fprintf(yyout, "IFFFFFFFFF\n");
-	fprintf(yyout, "..............................................\n");
+	fprintf(yyout, "______________________________________\n");
 	fprintf(yyout, ".data\n");
 	dataOper($2.a);
 	fprintf(yyout, ".text\n");
 	textIf(globalSignCond,$2.f);
-	fprintf(yyout, "..............................................\n");
-	globalNumCounter =0;
-	globalOpCounter =0;
-	globalBoolCond =0;
-
+	fprintf(yyout, "______________________________________\n");
+	globalNumCounter = 0;
+	globalOpCounter  = 0;
+	globalBoolCond   = 0;
 }
 
-| IF calc THEN  sentence  ELSE  sentence  ENDIF SEMI_COLUMN 
+| IF calc THEN sentence ELSE sentence ENDIF SEMI_COLUMN 
 { 
 	//$$.f = newflow('I', $2.f, $5.f, $9.f); 
-	fprintf(yyout, "..............................................\n");
+	fprintf(yyout, "______________________________________\n");
 	fprintf(yyout, ".data\n");
 	dataOper($2.a);
 	fprintf(yyout, ".text\n");
 	textIf(globalSignCond,$2.f);
-	fprintf(yyout, "..............................................\n");
+	fprintf(yyout, "______________________________________\n");
 	globalNumCounter =0;
 	globalOpCounter =0;
 	globalBoolCond =0;
@@ -297,7 +295,7 @@ if_sentence: IF calc THEN sentence ENDIF SEMI_COLUMN
 ;
 
 /*ARBOL*/
-calc:  calc ADD calc 
+calc: calc ADD calc 
 { 
 	//printf("ADD ON of\n");
 	globalOpCounter = globalOpCounter + 1;
@@ -694,7 +692,7 @@ while_loop: WHILE calc LOOP sentence  ENDLOOP SEMI_COLUMN
 	//$$.f = newflow('W', $2.f, $4.f, NULL);  
 	//fprintf(yyout, "WHILEEEEEE\n");
 	//printf("while\n");
-	fprintf(yyout, "..............................................\n");
+	fprintf(yyout, "______________________________________\n");
 	fprintf(yyout, ".data\n");
 	dataOper($2.f);
 	fprintf(yyout, ".text\n");
@@ -703,14 +701,14 @@ while_loop: WHILE calc LOOP sentence  ENDLOOP SEMI_COLUMN
 	globalOpCounter = 0;
 	globalBoolCond = 0;
 
-	fprintf(yyout, "..............................................\n");
+	fprintf(yyout, "______________________________________\n");
 }
 ;
 
-bucle_for: FOR factor IN rangos LOOP  sentence  ENDLOOP SEMI_COLUMN
+for_loop: FOR factor IN iter_range LOOP sentence ENDLOOP SEMI_COLUMN
 ;
 
-rangos: factor RANGE factor //{fprintf(yyout, "Variable\n");}
+iter_range: factor RANGE factor //{fprintf(yyout, "Variable\n");}
 ;
 
 
@@ -760,6 +758,12 @@ int main(int argc, char *argv[])
 		}
 
 		yyparse();
+	}
+
+	if (!compiling_ok) {
+		printf(RED "\n\nERROR" RESET, 30);
+		printf(" - Unexpected token while parsing. \n");
+		printf(RED"\nABORTING ---\n"RESET);
 	}
 
 	return 0;

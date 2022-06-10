@@ -93,10 +93,11 @@
 extern FILE *yyin;
 extern FILE *yyout;
 
-int globalError =0;
-int globalNumCounter =0;
-int globalOpCounter =0;
-int globalBoolCond = 0;
+int globalError 	 = 0;
+int globalNumCounter = 0;
+int globalOpCounter  = 0;
+int globalBoolCond 	 = 0;
+int compiling_ok     = 0;
 char globalSignCond;
 char *globalType;
 
@@ -110,11 +111,11 @@ add_SymNum ( char *sym_name, int sym_val, char *sym_type )
    	if (s == 0)
 	{
         s = putsymNum (sym_name,sym_val, sym_type);
-        printf( "The variable %s it's not defined, it gets defined as %d and of the type %s \n", sym_name, sym_val, sym_type );
+        printf( "The variable %s is not defined, it gets defined as %d and of the type %s \n", sym_name, sym_val, sym_type );
    	}
 	else
 	{
-		printf( "The variable %s it's already defined, with the value %d and of the type %s \n", sym_name, sym_val, sym_type );
+		printf( "The variable %s is already defined, with the value %d and of the type %s \n", sym_name, sym_val, sym_type );
    	}
 }
 
@@ -124,7 +125,7 @@ Update_SymNum( char *sym_name, int sym_val )
 
   	if ( getsymNum( sym_name, sym_val ) == 0 ) 
 	{
-    	printf( "The variable %s it's not defined, it's %d\n", sym_name, sym_val );
+    	printf( "The variable %s is not defined, its %d\n", sym_name, sym_val );
   	}
 	else
 	{
@@ -143,11 +144,11 @@ add_SymText ( char *sym_name, char *sym_text, char *sym_type )
    	if (s == 0)
 	{
         s = putsymText (sym_name,sym_text, sym_type);
-        printf( "The variable %s it's not defined, it gets defined with the value %s and of %s type \n\n", sym_name, sym_text, sym_type );
+        printf( "The variable %s is not defined, it gets defined with the value %s and of %s type \n\n", sym_name, sym_text, sym_type );
    	}
 	else 
 	{
-        printf( "The variable %s it's already defined, it's of type %s \n\n", sym_name, sym_text, sym_type );
+        printf( "The variable %s is already defined, it is of type %s \n\n", sym_name, sym_text, sym_type );
    	}
 }
 
@@ -156,7 +157,7 @@ Update_SymText( char *sym_name, char *sym_text  )
 	symbolRec *act;
   	if ( getsymText( sym_name, sym_text ) == 0 )
 	{
-     	printf( "The variable %s it's not found\n", sym_name, sym_text );
+     	printf( "The variable %s was not found\n", sym_name, sym_text );
   	}
 	else
 	{
@@ -167,7 +168,7 @@ Update_SymText( char *sym_name, char *sym_text  )
 
 
 
-#line 171 "./src/y.tab.c"
+#line 172 "./src/y.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -261,8 +262,8 @@ enum yysymbol_kind_t
   YYSYMBOL_Fun = 63,                       /* Fun  */
   YYSYMBOL_factor = 64,                    /* factor  */
   YYSYMBOL_while_loop = 65,                /* while_loop  */
-  YYSYMBOL_bucle_for = 66,                 /* bucle_for  */
-  YYSYMBOL_rangos = 67                     /* rangos  */
+  YYSYMBOL_for_loop = 66,                  /* for_loop  */
+  YYSYMBOL_iter_range = 67                 /* iter_range  */
 };
 typedef enum yysymbol_kind_t yysymbol_kind_t;
 
@@ -652,11 +653,11 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,   135,   135,   140,   143,   145,   147,   153,   167,   171,
-     175,   176,   179,   187,   191,   195,   199,   205,   206,   209,
-     252,   258,   259,   260,   261,   262,   263,   267,   284,   300,
-     355,   413,   471,   538,   560,   578,   599,   608,   614,   639,
-     644,   659,   684,   685,   686,   687,   688,   692,   710,   713
+       0,   136,   136,   142,   145,   147,   149,   155,   170,   174,
+     178,   179,   182,   190,   194,   198,   202,   208,   209,   212,
+     255,   261,   262,   263,   264,   265,   266,   270,   283,   299,
+     354,   412,   470,   537,   559,   577,   598,   607,   613,   638,
+     643,   658,   683,   684,   685,   686,   687,   691,   709,   712
 };
 #endif
 
@@ -682,7 +683,7 @@ static const char *const yytname[] =
   "$accept", "comp", "body", "initproc", "endproc", "var_name",
   "func_name", "expression", "beginning", "statements", "statement",
   "type", "sentence", "expr", "if_sentence", "calc", "function",
-  "nombreFuncion", "Fun", "factor", "while_loop", "bucle_for", "rangos", YY_NULLPTR
+  "nombreFuncion", "Fun", "factor", "while_loop", "for_loop", "iter_range", YY_NULLPTR
 };
 
 static const char *
@@ -1303,35 +1304,36 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* comp: body  */
-#line 136 "./src/parser.y"
+#line 137 "./src/parser.y"
 {
 	printf(YEL"FINISH "RESET" -- ALL "GRN"OK"RESET"\n"); 
+	compiling_ok = 1;
 }
-#line 1311 "./src/y.tab.c"
+#line 1313 "./src/y.tab.c"
     break;
 
   case 4: /* initproc: PROCEDURE var_name IS  */
-#line 143 "./src/parser.y"
+#line 145 "./src/parser.y"
                                    { printf(BLU"START OF THE PROCEDURE "RESET"-- \n\n");   }
-#line 1317 "./src/y.tab.c"
+#line 1319 "./src/y.tab.c"
     break;
 
   case 5: /* endproc: END func_name SEMI_COLUMN  */
-#line 145 "./src/parser.y"
+#line 147 "./src/parser.y"
                                    { printf("--- \n"BLU"END OF THE PROCEDURE "RESET"\n\n"); }
-#line 1323 "./src/y.tab.c"
+#line 1325 "./src/y.tab.c"
     break;
 
   case 6: /* var_name: IDENTIFIER  */
-#line 148 "./src/parser.y"
+#line 150 "./src/parser.y"
 {
 	add_SymText ( "Name", (yyvsp[0].string), "string" );
 }
-#line 1331 "./src/y.tab.c"
+#line 1333 "./src/y.tab.c"
     break;
 
   case 7: /* func_name: IDENTIFIER  */
-#line 154 "./src/parser.y"
+#line 156 "./src/parser.y"
 {
 
 	if (strcmp((yyvsp[0].string), getvalsymText("Name")) == 0) 
@@ -1342,79 +1344,80 @@ yyreduce:
 	else
 	{
 		printf("The names at the beginning and the end are NOT the same --> "RED"ERROR"RESET" \n");
+		exit(1);
 	}
 }
-#line 1348 "./src/y.tab.c"
+#line 1351 "./src/y.tab.c"
     break;
 
   case 8: /* expression: statements beginning sentence  */
-#line 167 "./src/parser.y"
+#line 170 "./src/parser.y"
                                             {}
-#line 1354 "./src/y.tab.c"
+#line 1357 "./src/y.tab.c"
     break;
 
   case 9: /* beginning: START  */
-#line 171 "./src/parser.y"
+#line 174 "./src/parser.y"
                  {printf("###########################\n "YEL"BEGIN"RESET" \n###########################\n\n");}
-#line 1360 "./src/y.tab.c"
+#line 1363 "./src/y.tab.c"
     break;
 
   case 12: /* statement: IDENTIFIER COLUMN type SEMI_COLUMN  */
-#line 180 "./src/parser.y"
+#line 183 "./src/parser.y"
 { 
 	printf("The variable %s gets defined \n", (yyvsp[-3].string));
 	(yyval.snum).text = (yyvsp[-3].string); add_SymText ( (yyval.snum).text, (yyval.snum).text, globalType);
 }
-#line 1369 "./src/y.tab.c"
+#line 1372 "./src/y.tab.c"
     break;
 
   case 13: /* type: INTEGER  */
-#line 187 "./src/parser.y"
+#line 190 "./src/parser.y"
               {
 			globalType= " integer";
 			printf(YEL"A variable of type Integer is defined\n"RESET);
 		}
-#line 1378 "./src/y.tab.c"
+#line 1381 "./src/y.tab.c"
     break;
 
   case 14: /* type: FLOAT  */
-#line 191 "./src/parser.y"
+#line 194 "./src/parser.y"
               {
 			globalType= "float";
 			printf(YEL"A variable of type Float is defined\n"RESET);
 		}
-#line 1387 "./src/y.tab.c"
+#line 1390 "./src/y.tab.c"
     break;
 
   case 15: /* type: STRING  */
-#line 195 "./src/parser.y"
+#line 198 "./src/parser.y"
                {
 			globalType= "string";
 			printf(YEL"A variable of type String is defined\n"RESET);
 		}
-#line 1396 "./src/y.tab.c"
+#line 1399 "./src/y.tab.c"
     break;
 
   case 16: /* type: BOOLEAN  */
-#line 199 "./src/parser.y"
+#line 202 "./src/parser.y"
                 {
 			globalType= "boolean";
 			printf(YEL"A variable of type Boolean is defined\n"RESET);
 		}
-#line 1405 "./src/y.tab.c"
+#line 1408 "./src/y.tab.c"
     break;
 
   case 19: /* expr: IDENTIFIER COL_EQUAL calc SEMI_COLUMN  */
-#line 209 "./src/parser.y"
+#line 212 "./src/parser.y"
                                              {
 	if (globalBoolCond == 0) {
 		globalBoolCond =0;
- 		fprintf(yyout, "..............................................\n");
+ 		fprintf(yyout, "_____________________\n");
  		fprintf(yyout, ".data\n");
 		dataOper((yyvsp[-1].snum).a);
  		fprintf(yyout, ".text\n");
 		textOper((yyvsp[-1].snum).a);
- 		fprintf(yyout, "..............................................\n");
+ 		fprintf(yyout, "_____________________\n");
 		globalNumCounter =0;
 		globalOpCounter =0;
 		globalBoolCond =0;
@@ -1449,93 +1452,89 @@ yyreduce:
 	}
 
 }
-#line 1453 "./src/y.tab.c"
+#line 1456 "./src/y.tab.c"
     break;
 
   case 20: /* expr: if_sentence  */
-#line 253 "./src/parser.y"
+#line 256 "./src/parser.y"
 {
 	globalNumCounter = 0;
 	//printf("Llego 1");
 }
-#line 1462 "./src/y.tab.c"
+#line 1465 "./src/y.tab.c"
     break;
 
   case 21: /* expr: PUTLINE LEFTP_COM IDENTIFIER RIGHTP_COM SEMI_COLUMN  */
-#line 258 "./src/parser.y"
+#line 261 "./src/parser.y"
                                                         { printf("Put_Line\n");   }
-#line 1468 "./src/y.tab.c"
+#line 1471 "./src/y.tab.c"
     break;
 
   case 22: /* expr: IDENTIFIER COL_EQUAL factor SEMI_COLUMN  */
-#line 259 "./src/parser.y"
+#line 262 "./src/parser.y"
                                                                         { printf("Asignacion\n"); }
-#line 1474 "./src/y.tab.c"
+#line 1477 "./src/y.tab.c"
     break;
 
   case 23: /* expr: LINE_COMMENT  */
-#line 260 "./src/parser.y"
+#line 263 "./src/parser.y"
                 { printf("COMMENT \n");		 }
-#line 1480 "./src/y.tab.c"
+#line 1483 "./src/y.tab.c"
     break;
 
   case 24: /* expr: while_loop  */
-#line 261 "./src/parser.y"
+#line 264 "./src/parser.y"
                 { printf("WHILE LOOP \n\n"); }
-#line 1486 "./src/y.tab.c"
+#line 1489 "./src/y.tab.c"
     break;
 
-  case 25: /* expr: bucle_for  */
-#line 262 "./src/parser.y"
+  case 25: /* expr: for_loop  */
+#line 265 "./src/parser.y"
                 { printf("FOR LOOP \n\n");	 }
-#line 1492 "./src/y.tab.c"
+#line 1495 "./src/y.tab.c"
     break;
 
   case 26: /* expr: function  */
-#line 263 "./src/parser.y"
+#line 266 "./src/parser.y"
                         { printf("FUNCTION \n\n");	 }
-#line 1498 "./src/y.tab.c"
+#line 1501 "./src/y.tab.c"
     break;
 
   case 27: /* if_sentence: IF calc THEN sentence ENDIF SEMI_COLUMN  */
-#line 268 "./src/parser.y"
+#line 271 "./src/parser.y"
 {
-	//printf("LLEGADA AL 2");
-	//$$.f = newflow('I', $2.f , $5.f, NULL); 
-	//fprintf(yyout, "IFFFFFFFFF\n");
-	fprintf(yyout, "..............................................\n");
+	fprintf(yyout, "_____________________\n");
 	fprintf(yyout, ".data\n");
 	dataOper((yyvsp[-4].snum).a);
 	fprintf(yyout, ".text\n");
 	textIf(globalSignCond,(yyvsp[-4].snum).f);
-	fprintf(yyout, "..............................................\n");
-	globalNumCounter =0;
-	globalOpCounter =0;
-	globalBoolCond =0;
-
+	fprintf(yyout, "_____________________\n");
+	globalNumCounter = 0;
+	globalOpCounter  = 0;
+	globalBoolCond   = 0;
 }
-#line 1518 "./src/y.tab.c"
+#line 1517 "./src/y.tab.c"
     break;
 
   case 28: /* if_sentence: IF calc THEN sentence ELSE sentence ENDIF SEMI_COLUMN  */
-#line 285 "./src/parser.y"
+#line 284 "./src/parser.y"
 { 
 	//$$.f = newflow('I', $2.f, $5.f, $9.f); 
-	fprintf(yyout, "..............................................\n");
+	fprintf(yyout, "_____________________\n");
 	fprintf(yyout, ".data\n");
 	dataOper((yyvsp[-6].snum).a);
 	fprintf(yyout, ".text\n");
 	textIf(globalSignCond,(yyvsp[-6].snum).f);
-	fprintf(yyout, "..............................................\n");
+	fprintf(yyout, "_____________________\n");
 	globalNumCounter =0;
 	globalOpCounter =0;
 	globalBoolCond =0;
 }
-#line 1535 "./src/y.tab.c"
+#line 1534 "./src/y.tab.c"
     break;
 
   case 29: /* calc: calc ADD calc  */
-#line 301 "./src/parser.y"
+#line 300 "./src/parser.y"
 { 
 	//printf("ADD ON of\n");
 	globalOpCounter = globalOpCounter + 1;
@@ -1590,11 +1589,11 @@ yyreduce:
 	}
 
 }
-#line 1594 "./src/y.tab.c"
+#line 1593 "./src/y.tab.c"
     break;
 
   case 30: /* calc: calc SUBS calc  */
-#line 356 "./src/parser.y"
+#line 355 "./src/parser.y"
 { 
 	//printf("SUBTRACTION \n");
 	globalOpCounter = globalOpCounter + 1;
@@ -1651,11 +1650,11 @@ yyreduce:
 	}
 
 }
-#line 1655 "./src/y.tab.c"
+#line 1654 "./src/y.tab.c"
     break;
 
   case 31: /* calc: calc MULT calc  */
-#line 414 "./src/parser.y"
+#line 413 "./src/parser.y"
 { 
 	//printf("MULTIPLICATION\n");
 	globalOpCounter = globalOpCounter + 1;
@@ -1712,11 +1711,11 @@ yyreduce:
 	}
 
 }
-#line 1716 "./src/y.tab.c"
+#line 1715 "./src/y.tab.c"
     break;
 
   case 32: /* calc: calc DIV calc  */
-#line 471 "./src/parser.y"
+#line 470 "./src/parser.y"
                  {
 	//printf("DIVISION \n");
 	globalOpCounter = globalOpCounter + 1;
@@ -1782,11 +1781,11 @@ yyreduce:
 	}
 
 }
-#line 1786 "./src/y.tab.c"
+#line 1785 "./src/y.tab.c"
     break;
 
   case 33: /* calc: calc BIG_THAN calc  */
-#line 539 "./src/parser.y"
+#line 538 "./src/parser.y"
 {
 	printf(YEL"\nBIGGER THAN condition\n" RESET);
 	globalBoolCond = 1;
@@ -1808,11 +1807,11 @@ yyreduce:
 	}
 
 }
-#line 1812 "./src/y.tab.c"
+#line 1811 "./src/y.tab.c"
     break;
 
   case 34: /* calc: calc LES_THAN calc  */
-#line 560 "./src/parser.y"
+#line 559 "./src/parser.y"
                      {
 	printf(YEL "\NLESS THAN condition.\n" RESET);
 	globalBoolCond = 1;
@@ -1831,11 +1830,11 @@ yyreduce:
 		printf( "Condition LESS THAN is false - It's not smaller\n");
 	}
 }
-#line 1835 "./src/y.tab.c"
+#line 1834 "./src/y.tab.c"
     break;
 
   case 35: /* calc: calc EQUALS calc  */
-#line 578 "./src/parser.y"
+#line 577 "./src/parser.y"
                    {
 	printf(YEL "EQUALS condition\n" RESET);
 	globalBoolCond = 1;
@@ -1856,11 +1855,11 @@ yyreduce:
 	}
 
 }
-#line 1860 "./src/y.tab.c"
+#line 1859 "./src/y.tab.c"
     break;
 
   case 36: /* calc: INTEGERNUM  */
-#line 600 "./src/parser.y"
+#line 599 "./src/parser.y"
 { 
 	(yyval.snum).a = newnum((yyvsp[0].number));
 	(yyval.snum).value = (yyvsp[0].number);
@@ -1868,20 +1867,20 @@ yyreduce:
 	globalNumCounter = globalNumCounter +1;
 	contadorNumeros(globalNumCounter, (yyval.snum).value );
 }
-#line 1872 "./src/y.tab.c"
+#line 1871 "./src/y.tab.c"
     break;
 
   case 37: /* calc: REALNUM  */
-#line 609 "./src/parser.y"
+#line 608 "./src/parser.y"
 {
 	(yyval.snum).a= newnum((yyvsp[0].numberf));
 	(yyval.snum).dvalue = (yyvsp[0].numberf); (yyval.snum).type = "real";
 }
-#line 1881 "./src/y.tab.c"
+#line 1880 "./src/y.tab.c"
     break;
 
   case 38: /* calc: IDENTIFIER  */
-#line 615 "./src/parser.y"
+#line 614 "./src/parser.y"
 {
 	//printf("variable\n");
 	(yyval.snum).type = "string";
@@ -1903,19 +1902,19 @@ yyreduce:
 		printf("The variable %s does exist \n", (yyvsp[0].string));		
 	}
 }
-#line 1907 "./src/y.tab.c"
+#line 1906 "./src/y.tab.c"
     break;
 
   case 39: /* function: FUNCTION nombreFuncion LEFT_P statements RIGHT_P RETURN type IS START sentence Fun END SEMI_COLUMN  */
-#line 639 "./src/parser.y"
+#line 638 "./src/parser.y"
                                                                                                              {
 	//$$.fun = newfunc($4.fun, $11.fun);
 }
-#line 1915 "./src/y.tab.c"
+#line 1914 "./src/y.tab.c"
     break;
 
   case 40: /* nombreFuncion: IDENTIFIER  */
-#line 645 "./src/parser.y"
+#line 644 "./src/parser.y"
 {
 	if (!getvalsymNum((yyvsp[0].string)))
 	{
@@ -1928,11 +1927,11 @@ yyreduce:
 	}
 	//fprintf(yyout, "Name function\n");
 }
-#line 1932 "./src/y.tab.c"
+#line 1931 "./src/y.tab.c"
     break;
 
   case 41: /* Fun: RETURN IDENTIFIER  */
-#line 659 "./src/parser.y"
+#line 658 "./src/parser.y"
                        {
 
 	if (!getvalsymText((yyvsp[0].string)))
@@ -1955,16 +1954,16 @@ yyreduce:
 		}
 	}
 }
-#line 1959 "./src/y.tab.c"
+#line 1958 "./src/y.tab.c"
     break;
 
   case 47: /* while_loop: WHILE calc LOOP sentence ENDLOOP SEMI_COLUMN  */
-#line 693 "./src/parser.y"
+#line 692 "./src/parser.y"
 { 
 	//$$.f = newflow('W', $2.f, $4.f, NULL);  
 	//fprintf(yyout, "WHILEEEEEE\n");
 	//printf("while\n");
-	fprintf(yyout, "..............................................\n");
+	fprintf(yyout, "_____________________\n");
 	fprintf(yyout, ".data\n");
 	dataOper((yyvsp[-4].snum).f);
 	fprintf(yyout, ".text\n");
@@ -1973,13 +1972,13 @@ yyreduce:
 	globalOpCounter = 0;
 	globalBoolCond = 0;
 
-	fprintf(yyout, "..............................................\n");
+	fprintf(yyout, "_____________________\n");
 }
-#line 1979 "./src/y.tab.c"
+#line 1978 "./src/y.tab.c"
     break;
 
 
-#line 1983 "./src/y.tab.c"
+#line 1982 "./src/y.tab.c"
 
       default: break;
     }
@@ -2172,7 +2171,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 717 "./src/parser.y"
+#line 716 "./src/parser.y"
 
 
 int file_isreg(const char *path)
@@ -2203,7 +2202,6 @@ int main(int argc, char *argv[])
 				printf(RED"ERROR "RESET"- Invalid argument.\n", 30);
 				exit(1);
 			}
-
 			
 		}
 		else 
@@ -2220,6 +2218,12 @@ int main(int argc, char *argv[])
 		}
 
 		yyparse();
+	}
+
+	if (!compiling_ok) {
+		printf(RED "\n\nERROR" RESET, 30);
+		printf(" - Unexpected token while parsing. \n");
+		printf(RED"\nABORTING ---\n"RESET);
 	}
 
 	return 0;

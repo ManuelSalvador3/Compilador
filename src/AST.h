@@ -305,9 +305,8 @@ void textIf(char signo, struct flow *f)
 {
   int valFin =0;
 
-  for(int i = 0; i < 2; ++i) {
+  for(int i = 0; i < 2; ++i)
     fprintf(yyout, "addi $t%d, $zero, %d\n", i, datos[i+1]);
-  }
 
   if ( signo == '<') 
   {
@@ -510,8 +509,8 @@ double evalprint(struct ast *a)
   double v;
   int count = 0;
  
-
-  switch(a->nodetype) {
+  switch(a->nodetype) 
+  {
     case 'K':
       v = ((struct numval *)a)->number;
     break;
