@@ -652,9 +652,9 @@ static const yytype_int16 yyrline[] =
        0,   133,   133,   139,   142,   144,   146,   152,   166,   170,
      174,   175,   178,   193,   197,   201,   205,   211,   212,   215,
      245,   250,   251,   252,   253,   254,   255,   259,   266,   273,
-     285,   319,   354,   389,   432,   453,   470,   490,   499,   505,
-     529,   534,   548,   573,   574,   575,   576,   577,   581,   589,
-     596
+     281,   315,   350,   385,   428,   449,   466,   486,   495,   501,
+     525,   530,   544,   569,   570,   571,   572,   573,   577,   585,
+     592
 };
 #endif
 
@@ -1526,19 +1526,15 @@ yyreduce:
   case 29: /* if_sentence: IF calc THEN sentence ELSE sentence ENDIF SEMI_COLUMN  */
 #line 274 "./src/parser.y"
 { 
-	fprintf(yyout, "\n");
-	fprintf(yyout, ".data\n");
+	(yyval.snum).node = newast('I', (yyvsp[-6].snum).node, (yyvsp[-4].snum).node);
 	dataOper((yyvsp[-6].snum).node);
-	fprintf(yyout, ".text\n");
-	textIf((yyval.snum).globalSignCond,(yyvsp[-6].snum).f);
-	fprintf(yyout, "\n");
-	(yyval.snum).globalNumCounter = 0;
+ 	textIf((yyval.snum).globalSignCond,(yyvsp[-6].snum).f);
 }
-#line 1538 "./src/y.tab.c"
+#line 1534 "./src/y.tab.c"
     break;
 
   case 30: /* calc: calc ADD calc  */
-#line 286 "./src/parser.y"
+#line 282 "./src/parser.y"
 { 
 
 	if (!(yyval.snum).valid)
@@ -1572,11 +1568,11 @@ yyreduce:
 	}
 
 }
-#line 1576 "./src/y.tab.c"
+#line 1572 "./src/y.tab.c"
     break;
 
   case 31: /* calc: calc SUBS calc  */
-#line 320 "./src/parser.y"
+#line 316 "./src/parser.y"
 { 
 
 	if (!(yyval.snum).valid) 
@@ -1610,11 +1606,11 @@ yyreduce:
 	}
 
 }
-#line 1614 "./src/y.tab.c"
+#line 1610 "./src/y.tab.c"
     break;
 
   case 32: /* calc: calc MULT calc  */
-#line 355 "./src/parser.y"
+#line 351 "./src/parser.y"
 { 
 
 	if ((yyval.snum).valid == 0) 
@@ -1648,11 +1644,11 @@ yyreduce:
 	}
 
 }
-#line 1652 "./src/y.tab.c"
+#line 1648 "./src/y.tab.c"
     break;
 
   case 33: /* calc: calc DIV calc  */
-#line 389 "./src/parser.y"
+#line 385 "./src/parser.y"
                  {
 
 	if (!(yyvsp[0].snum).value)	
@@ -1694,11 +1690,11 @@ yyreduce:
 	}
 
 }
-#line 1698 "./src/y.tab.c"
+#line 1694 "./src/y.tab.c"
     break;
 
   case 34: /* calc: calc BIG_THAN calc  */
-#line 433 "./src/parser.y"
+#line 429 "./src/parser.y"
 {
 	printf(YEL"\nBIGGER THAN condition\n" RESET);
 
@@ -1719,11 +1715,11 @@ yyreduce:
 	}
 
 }
-#line 1723 "./src/y.tab.c"
+#line 1719 "./src/y.tab.c"
     break;
 
   case 35: /* calc: calc LES_THAN calc  */
-#line 453 "./src/parser.y"
+#line 449 "./src/parser.y"
                      {
 	printf(YEL "\NLESS THAN condition.\n" RESET);
 	if ((yyvsp[-2].snum).value < (yyvsp[0].snum).value) {
@@ -1741,11 +1737,11 @@ yyreduce:
 		printf( "Condition LESS THAN is false - It's not smaller\n");
 	}
 }
-#line 1745 "./src/y.tab.c"
+#line 1741 "./src/y.tab.c"
     break;
 
   case 36: /* calc: calc EQUALS calc  */
-#line 470 "./src/parser.y"
+#line 466 "./src/parser.y"
                    {
 	printf(YEL "EQUALS condition\n" RESET);
 
@@ -1765,11 +1761,11 @@ yyreduce:
 	}
 
 }
-#line 1769 "./src/y.tab.c"
+#line 1765 "./src/y.tab.c"
     break;
 
   case 37: /* calc: INTEGERNUM  */
-#line 491 "./src/parser.y"
+#line 487 "./src/parser.y"
 { 
 	(yyval.snum).node = newnum((yyvsp[0].number));
 	(yyval.snum).value = (yyvsp[0].number);
@@ -1777,20 +1773,20 @@ yyreduce:
 	(yyval.snum).globalNumCounter = (yyval.snum).globalNumCounter +1;
 	numCounter((yyval.snum).globalNumCounter, (yyval.snum).value );
 }
-#line 1781 "./src/y.tab.c"
+#line 1777 "./src/y.tab.c"
     break;
 
   case 38: /* calc: REALNUM  */
-#line 500 "./src/parser.y"
+#line 496 "./src/parser.y"
 {
 	(yyval.snum).node= newnum((yyvsp[0].numberf));
 	(yyval.snum).dvalue = (yyvsp[0].numberf); (yyval.snum).type = "real";
 }
-#line 1790 "./src/y.tab.c"
+#line 1786 "./src/y.tab.c"
     break;
 
   case 39: /* calc: IDENTIFIER  */
-#line 506 "./src/parser.y"
+#line 502 "./src/parser.y"
 {
 	(yyval.snum).type = "string";
 
@@ -1811,19 +1807,19 @@ yyreduce:
 		printf("The variable %s does exist \n", (yyvsp[0].string));		
 	}
 }
-#line 1815 "./src/y.tab.c"
+#line 1811 "./src/y.tab.c"
     break;
 
   case 40: /* function: FUNCTION nombreFuncion LEFT_P statements RIGHT_P RETURN type IS START sentence Fun END SEMI_COLUMN  */
-#line 529 "./src/parser.y"
+#line 525 "./src/parser.y"
                                                                                                              {
 	//$$.fun = newfunc($4.fun, $11.fun);
 }
-#line 1823 "./src/y.tab.c"
+#line 1819 "./src/y.tab.c"
     break;
 
   case 41: /* nombreFuncion: IDENTIFIER  */
-#line 535 "./src/parser.y"
+#line 531 "./src/parser.y"
 {
 	if (!getvalsymNum((yyvsp[0].string)))
 	{
@@ -1835,11 +1831,11 @@ yyreduce:
 		printf("There is a function with that name --> "RED" ERROR\n"RESET"");		
 	}
 }
-#line 1839 "./src/y.tab.c"
+#line 1835 "./src/y.tab.c"
     break;
 
   case 42: /* Fun: RETURN IDENTIFIER  */
-#line 548 "./src/parser.y"
+#line 544 "./src/parser.y"
                        {
 
 	if (!getvalsymText((yyvsp[0].string)))
@@ -1862,31 +1858,31 @@ yyreduce:
 		}
 	}
 }
-#line 1866 "./src/y.tab.c"
+#line 1862 "./src/y.tab.c"
     break;
 
   case 48: /* while_loop: WHILE calc LOOP sentence ENDLOOP SEMI_COLUMN  */
-#line 582 "./src/parser.y"
+#line 578 "./src/parser.y"
 { 
 	(yyval.snum).node = newast('W', (yyvsp[-4].snum).node, (yyvsp[-2].snum).node);
 	dataOper((yyvsp[-4].snum).f);
 	textWhile((yyval.snum).globalSignCond, (yyval.snum).f);
 }
-#line 1876 "./src/y.tab.c"
+#line 1872 "./src/y.tab.c"
     break;
 
   case 49: /* for_loop: FOR IDENTIFIER IN iter_range LOOP sentence ENDLOOP SEMI_COLUMN  */
-#line 589 "./src/parser.y"
+#line 585 "./src/parser.y"
                                                                          {
 	(yyval.snum).node = newast('W', (yyvsp[-6].string), (yyvsp[-2].snum).node);
 
 	printf("BUCLE FOOR\n");
 }
-#line 1886 "./src/y.tab.c"
+#line 1882 "./src/y.tab.c"
     break;
 
 
-#line 1890 "./src/y.tab.c"
+#line 1886 "./src/y.tab.c"
 
       default: break;
     }
@@ -2079,7 +2075,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 600 "./src/parser.y"
+#line 596 "./src/parser.y"
 
 
 int file_isreg(const char *path)

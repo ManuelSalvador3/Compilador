@@ -78,7 +78,7 @@ struct ast * newast(int nodetype, struct ast *l, struct ast *r)
   node->l = l;
   node->r = r;
 
-  printf(TES"NEW AST NODE OF TYPE -> \" %s \" ||  "RESET, node);
+  printf(TES"NEW AST NODE OF TYPE -> \" %s \" || \n  "RESET, node);
 
   return node;
 }
@@ -541,6 +541,8 @@ double evalprint(struct ast *a)
       break;
 
     case 'A': // Assignment 
+      printf(TES"NEW AST NODE OF TYPE -> \" %d \" || \n  "RESET, a->nodetype);
+
       switch(a->type) {
         case 'f': // Float
           fprintf(yyout, "%s: .float %4.4g \n", a->l, eval(a->r));
@@ -561,9 +563,11 @@ double evalprint(struct ast *a)
       break;
 
     case 'I':
+      printf(TES"NEW AST NODE OF TYPE -> \" %d \" || \n  "RESET, a->nodetype);
       break;
 
     case 'W':
+      printf(TES"NEW AST NODE OF TYPE -> \" %d \" || \n  "RESET, a->nodetype);
       break;
 
     case '+': 
