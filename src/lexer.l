@@ -7,7 +7,7 @@
 
 digit       [0-9]
 character   [a-zA-Z]
-symbolchar  [a-zA-Z_\.]
+symbolchar  [a-zA-Z_\.] 
 
 
 %%
