@@ -1,4 +1,5 @@
-/* nodos en el árbol de sintaxis abstracta*/ 
+#define TES   "\x1B[33m"
+#define RESET "\x1B[0m"
 
 int datos[100];
 int operadores[100];
@@ -19,14 +20,16 @@ enum bifs
 struct ast 
 {
   int nodetype;
+  char type;
   struct ast *l;
   struct ast *r;
+  int number;
 };
 
 struct numval 
 { 
   int nodetype;
-  double number; 
+  int number; 
 };
 
 struct flow 
@@ -48,7 +51,7 @@ struct fncall
 extern FILE *yyout;
 
 struct ast *newast(int nodetype, struct ast *l, struct ast *r); 
-struct ast *newnum(double d);
+struct ast *newnum(int d);
 
 
 struct ast *newflow(int nodetype, struct ast *cond, struct ast *tl, struct ast *tr); 
@@ -63,22 +66,24 @@ static double callbuiltin(struct fncall *);
 
 struct ast * newast(int nodetype, struct ast *l, struct ast *r) 
 {
-  struct ast *a = malloc(sizeof(struct ast));
-  if(!a) 
+  struct ast *node = malloc(sizeof(struct ast));
+  
+  if(!node) 
   {
     yyerror("out of space");
     exit(0); 
   }
 
-  a->nodetype = nodetype; a->l = l;
-  a->r = r;
+  node->nodetype = nodetype; 
+  node->l = l;
+  node->r = r;
 
-  //printf("NEW AST %s ..|| ", a);
+  printf(TES"NEW AST NODE OF TYPE -> \" %s \" ||  "RESET, node);
 
-  return a;
+  return node;
 }
 
-struct ast * newnum(double d) 
+struct ast * newnum(int d) 
 {
   struct numval *a = malloc(sizeof(struct numval));
   if(!a) 
@@ -514,8 +519,56 @@ double evalprint(struct ast *a)
       v = ((struct numval *)a)->number;
     break;
 
+    case 'D': // Declaration
+      switch(a->r->number) {
+        case 'F': // Float
+          fprintf(yyout, "%s: .float\n", a->l);
+          break;
+        case '1': // Integer
+          fprintf(yyout, "%s: .word \n", a->l);
+          break;
+        case 'S': // String
+          fprintf(yyout, "%s: .asciiz \n", a->l);
+          break;
+        case 'B': // Boolean
+          fprintf(yyout, "%s: .word \n", a->l);
+          break;
+        default: 
+          printf("internal error: bad value type of node %c\n", a->nodetype); 
+          break;
+      }
+      
+      break;
+
+    case 'A': // Assignment 
+      switch(a->type) {
+        case 'f': // Float
+          fprintf(yyout, "%s: .float %4.4g \n", a->l, eval(a->r));
+          break;
+        case 'i': // Integer
+          fprintf(yyout, "%s: .word %4.4g \n", a->l, eval(a->r));
+          break;
+        case 's': // String
+          fprintf(yyout, "%s: .asciiz %4.4g \n", a->l, eval(a->r));
+          break;
+        case 'b': // Boolean
+          fprintf(yyout, "%s: .asciiz %4.4g \n", a->l, eval(a->r));
+          break;
+        default: 
+          printf("internal error: bad value type of node %c\n", a->nodetype); 
+          break;
+      }
+      break;
+
+    case 'I':
+      break;
+
+    case 'W':
+      break;
+
     case '+': 
       globalOperacion1="add XX %lf %lf \n", eval(a->l),eval(a->r);
+      fprintf(yyout,"syscall\n");
 
       v = eval(a->l) + eval(a->r);  
     break;

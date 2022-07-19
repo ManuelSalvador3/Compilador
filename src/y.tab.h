@@ -62,40 +62,41 @@ extern int yydebug;
     RIGHT_P = 263,                 /* RIGHT_P  */
     IF = 264,                      /* IF  */
     THEN = 265,                    /* THEN  */
-    BIG_THAN = 266,                /* BIG_THAN  */
-    LES_THAN = 267,                /* LES_THAN  */
-    ELSE = 268,                    /* ELSE  */
-    PROCEDURE = 269,               /* PROCEDURE  */
-    IS = 270,                      /* IS  */
-    END = 271,                     /* END  */
-    START = 272,                   /* START  */
-    COLUMN = 273,                  /* COLUMN  */
-    INTEGER = 274,                 /* INTEGER  */
-    FLOAT = 275,                   /* FLOAT  */
-    STRING = 276,                  /* STRING  */
-    BOOLEAN = 277,                 /* BOOLEAN  */
-    IDENTIFICADORSYMB = 278,       /* IDENTIFICADORSYMB  */
-    LEFTP_COM = 279,               /* LEFTP_COM  */
-    COL_EQUAL = 280,               /* COL_EQUAL  */
-    RIGHTP_COM = 281,              /* RIGHTP_COM  */
-    PUTLINE = 282,                 /* PUTLINE  */
-    ENDIF = 283,                   /* ENDIF  */
-    TRUE = 284,                    /* TRUE  */
-    FALSE = 285,                   /* FALSE  */
-    LINE_COMMENT = 286,            /* LINE_COMMENT  */
-    WHILE = 287,                   /* WHILE  */
-    LOOP = 288,                    /* LOOP  */
-    ENDLOOP = 289,                 /* ENDLOOP  */
-    EQUALS = 290,                  /* EQUALS  */
-    FOR = 291,                     /* FOR  */
-    IN = 292,                      /* IN  */
-    RANGE = 293,                   /* RANGE  */
-    FUNCTION = 294,                /* FUNCTION  */
-    RETURN = 295,                  /* RETURN  */
-    SEMI_COLUMN = 296,             /* SEMI_COLUMN  */
-    INTEGERNUM = 297,              /* INTEGERNUM  */
-    REALNUM = 298,                 /* REALNUM  */
-    IDENTIFIER = 299               /* IDENTIFIER  */
+    ELSIF = 266,                   /* ELSIF  */
+    BIG_THAN = 267,                /* BIG_THAN  */
+    LES_THAN = 268,                /* LES_THAN  */
+    ELSE = 269,                    /* ELSE  */
+    PROCEDURE = 270,               /* PROCEDURE  */
+    IS = 271,                      /* IS  */
+    END = 272,                     /* END  */
+    START = 273,                   /* START  */
+    COLUMN = 274,                  /* COLUMN  */
+    INTEGER = 275,                 /* INTEGER  */
+    FLOAT = 276,                   /* FLOAT  */
+    STRING = 277,                  /* STRING  */
+    BOOLEAN = 278,                 /* BOOLEAN  */
+    IDENTIFICADORSYMB = 279,       /* IDENTIFICADORSYMB  */
+    LEFTP_COM = 280,               /* LEFTP_COM  */
+    COL_EQUAL = 281,               /* COL_EQUAL  */
+    RIGHTP_COM = 282,              /* RIGHTP_COM  */
+    PUTLINE = 283,                 /* PUTLINE  */
+    ENDIF = 284,                   /* ENDIF  */
+    TRUE = 285,                    /* TRUE  */
+    FALSE = 286,                   /* FALSE  */
+    LINE_COMMENT = 287,            /* LINE_COMMENT  */
+    WHILE = 288,                   /* WHILE  */
+    LOOP = 289,                    /* LOOP  */
+    ENDLOOP = 290,                 /* ENDLOOP  */
+    EQUALS = 291,                  /* EQUALS  */
+    FOR = 292,                     /* FOR  */
+    IN = 293,                      /* IN  */
+    RANGE = 294,                   /* RANGE  */
+    FUNCTION = 295,                /* FUNCTION  */
+    RETURN = 296,                  /* RETURN  */
+    SEMI_COLUMN = 297,             /* SEMI_COLUMN  */
+    INTEGERNUM = 298,              /* INTEGERNUM  */
+    REALNUM = 299,                 /* REALNUM  */
+    IDENTIFIER = 300               /* IDENTIFIER  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -112,46 +113,47 @@ extern int yydebug;
 #define RIGHT_P 263
 #define IF 264
 #define THEN 265
-#define BIG_THAN 266
-#define LES_THAN 267
-#define ELSE 268
-#define PROCEDURE 269
-#define IS 270
-#define END 271
-#define START 272
-#define COLUMN 273
-#define INTEGER 274
-#define FLOAT 275
-#define STRING 276
-#define BOOLEAN 277
-#define IDENTIFICADORSYMB 278
-#define LEFTP_COM 279
-#define COL_EQUAL 280
-#define RIGHTP_COM 281
-#define PUTLINE 282
-#define ENDIF 283
-#define TRUE 284
-#define FALSE 285
-#define LINE_COMMENT 286
-#define WHILE 287
-#define LOOP 288
-#define ENDLOOP 289
-#define EQUALS 290
-#define FOR 291
-#define IN 292
-#define RANGE 293
-#define FUNCTION 294
-#define RETURN 295
-#define SEMI_COLUMN 296
-#define INTEGERNUM 297
-#define REALNUM 298
-#define IDENTIFIER 299
+#define ELSIF 266
+#define BIG_THAN 267
+#define LES_THAN 268
+#define ELSE 269
+#define PROCEDURE 270
+#define IS 271
+#define END 272
+#define START 273
+#define COLUMN 274
+#define INTEGER 275
+#define FLOAT 276
+#define STRING 277
+#define BOOLEAN 278
+#define IDENTIFICADORSYMB 279
+#define LEFTP_COM 280
+#define COL_EQUAL 281
+#define RIGHTP_COM 282
+#define PUTLINE 283
+#define ENDIF 284
+#define TRUE 285
+#define FALSE 286
+#define LINE_COMMENT 287
+#define WHILE 288
+#define LOOP 289
+#define ENDLOOP 290
+#define EQUALS 291
+#define FOR 292
+#define IN 293
+#define RANGE 294
+#define FUNCTION 295
+#define RETURN 296
+#define SEMI_COLUMN 297
+#define INTEGERNUM 298
+#define REALNUM 299
+#define IDENTIFIER 300
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 98 "./src/parser.y"
+#line 97 "./src/parser.y"
 
 	int number;
 	double numberf;
@@ -159,16 +161,14 @@ union YYSTYPE
 	struct 
 	{
 		char *type;
-		char *globalType;
 		char globalSignCond;
 		int value;
 		double dvalue;
 		char *text;
  		int booleanCond;
 		int globalNumCounter;
-		int globalBoolCond;
 		int valid;
-		struct ast *a;
+		struct ast *node;
 		struct flow *f;
 		struct fncall *fun;
 	} snum;

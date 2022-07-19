@@ -24,6 +24,7 @@ symbolchar  [a-zA-Z_\.]
 ")" 		{ return RIGHT_P;   }
 "if"  		{ return IF;        }
 "then" 		{ return THEN;      }
+"elsif"     { return ELSIF;     }
 ">" 		{ return BIG_THAN;  }
 "<" 		{ return LES_THAN;  }
 "else" 		{ return ELSE;      }

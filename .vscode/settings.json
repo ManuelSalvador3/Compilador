@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "random": "c",
+        "ctype.h": "c"
+    }
+}

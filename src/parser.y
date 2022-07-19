@@ -16,7 +16,6 @@
 #define GRN   "\x1B[32m"
 #define YEL   "\x1B[35m"
 #define BLU   "\x1B[34m"
-#define RESET "\x1B[0m"
 
 #define OUT_ARG "-o"
 
@@ -91,7 +90,7 @@ Update_SymText( char *sym_name, char *sym_text  )
   	}
 }
 
-char *globalType;
+char *parsedType;
 %}
 
 %union 
@@ -102,22 +101,20 @@ char *globalType;
 	struct 
 	{
 		char *type;
-		char *globalType;
 		char globalSignCond;
 		int value;
 		double dvalue;
 		char *text;
  		int booleanCond;
 		int globalNumCounter;
-		int globalBoolCond;
 		int valid;
-		struct ast *a;
+		struct ast *node;
 		struct flow *f;
 		struct fncall *fun;
 	} snum;
 }
 
-%token ADD SUBS MULT DIV LEFT_P RIGHT_P IF THEN BIG_THAN LES_THAN ELSE PROCEDURE IS END START COLUMN INTEGER FLOAT STRING BOOLEAN IDENTIFICADORSYMB LEFTP_COM COL_EQUAL RIGHTP_COM PUTLINE ENDIF TRUE FALSE LINE_COMMENT WHILE LOOP ENDLOOP EQUALS FOR IN RANGE FUNCTION RETURN SEMI_COLUMN
+%token ADD SUBS MULT DIV LEFT_P RIGHT_P IF THEN ELSIF BIG_THAN LES_THAN ELSE PROCEDURE IS END START COLUMN INTEGER FLOAT STRING BOOLEAN IDENTIFICADORSYMB LEFTP_COM COL_EQUAL RIGHTP_COM PUTLINE ENDIF TRUE FALSE LINE_COMMENT WHILE LOOP ENDLOOP EQUALS FOR IN RANGE FUNCTION RETURN SEMI_COLUMN
 
 %left ADD 	SUBS
 %left MULT 	DIV
@@ -126,7 +123,7 @@ char *globalType;
 %token <numberf> 	REALNUM
 %token <string> 	IDENTIFIER
 
-%type<snum> while_loop if_sentence func_name statement calc expr Fun function
+%type<snum> while_loop if_sentence for_loop func_name statement calc sentence expr Fun function
 
 
 %start comp
@@ -181,28 +178,34 @@ statements: statements  statement
 statement: IDENTIFIER COLUMN type SEMI_COLUMN 
 { 
 	printf("The variable %s gets defined \n", $1);
-	$$.text = $1; add_SymText( $$.text, $$.text, globalType);
+	$$.text = $1; 
+	$$.type = parsedType;
+	add_SymText($$.text, $$.text, $$.type);
+
+	$$.node = newast('D', $1, newnum($$.type[0]));
+	evalprint($$.node);	
 }
 ;
 
 
 
-type: INTEGER {
-			globalType= " integer";
-			printf(YEL"A variable of type Integer is defined\n"RESET);
-		}
-       |FLOAT {
-			globalType= "float";
-			printf(YEL"A variable of type Float is defined\n"RESET);
-		}
-       |STRING {
-			globalType= "string";
-			printf(YEL"A variable of type String is defined\n"RESET);
-		}
-       |BOOLEAN {
-			globalType= "boolean";
-			printf(YEL"A variable of type Boolean is defined\n"RESET);
-		}	
+type: 
+	INTEGER {
+		parsedType= " integer";
+		printf(YEL"A variable of type Integer is defined\n"RESET);
+	}
+	| FLOAT {
+		parsedType= "float";
+		printf(YEL"A variable of type Float is defined\n"RESET);
+	}
+	| STRING {
+		parsedType= "string";
+		printf(YEL"A variable of type String is defined\n"RESET);
+	}
+	| BOOLEAN {
+		parsedType= "boolean";
+		printf(YEL"A variable of type Boolean is defined\n"RESET);
+	}	
 ;
 
 sentence: sentence  expr 
@@ -210,18 +213,8 @@ sentence: sentence  expr
 ;
 
 expr: IDENTIFIER COL_EQUAL calc SEMI_COLUMN {
-	if ($$.globalBoolCond == 0) {
-		$$.globalBoolCond = 0;
- 		fprintf(yyout, "\n");
- 		fprintf(yyout, ".data\n");
-		dataOper($3.a);
- 		fprintf(yyout, ".text\n");
-		textOper($3.a);
- 		fprintf(yyout, "\n");
-		$$.globalNumCounter = 0;
-		$$.globalBoolCond   = 0;
-	}
-
+	$$.node = newast('A', $1, $3.node);
+	$$.node->type = $$.type[0];
 
 	$$.text= $1;
 
@@ -237,9 +230,10 @@ expr: IDENTIFIER COL_EQUAL calc SEMI_COLUMN {
 		else
 		{
 			printf("The variable %s has already been defined -->" GRN " CORRECT \n" RESET, $$.text);
-	 		add_SymNum($1, eval($3.a), globalType);
-			Update_SymNum( $1, eval($3.a) ); 
-			printf("RESULT OF %s equals to %4.4g \n\n", $1, eval($3.a));
+	 		add_SymNum($1, eval($3.node), $$.type);
+			Update_SymNum( $1, eval($3.node) ); 
+			printf("RESULT OF %s equals to %4.4g \n\n", $1, eval($3.node));
+			evalprint($$.node);
 		}
 	} 
 	else 
@@ -264,25 +258,23 @@ expr: IDENTIFIER COL_EQUAL calc SEMI_COLUMN {
 
 if_sentence: IF calc THEN sentence ENDIF SEMI_COLUMN 
 {
-	fprintf(yyout, "\n");
-	fprintf(yyout, ".data\n");
-	dataOper($2.a);
+	$$.node = newast('I', $2.node, $4.node);
+	dataOper($2.node);
  	textIf($$.globalSignCond,$2.f);
-	fprintf(yyout, "\n");
-	$$.globalNumCounter = 0;
-	$$.globalBoolCond   = 0;
+}
+
+| IF calc THEN sentence ELSIF calc THEN sentence ELSE sentence ENDIF SEMI_COLUMN
+{ 
+	$$.node = newast('I', $2.node, $4.node);
+	dataOper($2.node);
+ 	textIf($$.globalSignCond,$2.f);
 }
 
 | IF calc THEN sentence ELSE sentence ENDIF SEMI_COLUMN 
 { 
-	fprintf(yyout, "\n");
-	fprintf(yyout, ".data\n");
-	dataOper($2.a);
-	fprintf(yyout, ".text\n");
-	textIf($$.globalSignCond,$2.f);
-	fprintf(yyout, "\n");
-	$$.globalNumCounter = 0;
-	$$.globalBoolCond   = 0;
+	$$.node = newast('I', $2.node, $4.node);
+	dataOper($2.node);
+ 	textIf($$.globalSignCond,$2.f);
 }
 ;
 
@@ -293,16 +285,16 @@ calc: calc ADD calc
 	{
 		if (($1.type == " integer") && ($3.type == " integer")) 
 		{
-			$$.a = newast('+', $1.a,$3.a); 
-			evalprint($$.a);
-			globalType = $1.type;
+			$$.node = newast('+', $1.node,$3.node); 
+			evalprint($$.node);
+			$$.type = $1.type;
 			printf(YEL"ADD ON of %s type \n" RESET, $$.type);
 		} 
 		else if (($1.type == "real") && ($3.type == "real"))
 		{
-			$$.a = newast('+', $1.a,$3.a); 
-			evalprint($$.a);
-			globalType = $1.type;
+			$$.node = newast('+', $1.node,$3.node); 
+			evalprint($$.node);
+			$$.type = $1.type;
 			printf(YEL"ADD ON of %s type\n"RESET,  $$.type);
 		} 
 		else if (($1.type == "string") || ($3.type == "string"))
@@ -327,15 +319,15 @@ calc: calc ADD calc
 	{
 		if (($1.type == " integer") && ($3.type == " integer")) 
 		{
-			$$.a = newast('-', $1.a,$3.a); 
-			evalprint($$.a);
+			$$.node = newast('-', $1.node,$3.node); 
+			evalprint($$.node);
 
 			printf(YEL"SUBTRACTION of %s type \n"RESET, $$.type);
 		} 
 		else if (($1.type == "real") && ($3.type == "real"))
 		{
-			$$.a = newast('-', $1.a,$3.a); 
-			evalprint($$.a);
+			$$.node = newast('-', $1.node,$3.node); 
+			evalprint($$.node);
 
 			printf(YEL"SUBTRACTION of %s type \n"RESET, $$.type);
 		} 
@@ -362,15 +354,15 @@ calc: calc ADD calc
 	{ 
 		if (($1.type == " integer") && ($3.type == " integer"))
 		{
-			$$.a = newast('*', $1.a,$3.a); 
-			evalprint($$.a);
+			$$.node = newast('*', $1.node,$3.node); 
+			evalprint($$.node);
 
 			printf(YEL"MULTIPLICATION of %s type \n"RESET, $$.type);
 		} 
 		else if (($1.type == "real") && ($3.type == "real"))
 		{
-			$$.a = newast('*', $1.a,$3.a); 
-			evalprint($$.a);
+			$$.node = newast('*', $1.node,$3.node); 
+			evalprint($$.node);
 
 			printf(YEL"MULTIPLICATION of %s type \n"RESET, $$.type);
 		} 
@@ -404,15 +396,15 @@ calc: calc ADD calc
 	{ 
 		if (($1.type == " integer") && ($3.type == " integer"))
 		{
-			$$.a = newast('/', $1.a,$3.a); 
-			evalprint($$.a);
+			$$.node = newast('/', $1.node,$3.node); 
+			evalprint($$.node);
 
 			printf(YEL"DIVISION of %s type \n"RESET, $$.type);
 		} 
 		else if (($1.type == "real") && ($3.type == "real"))
 		{
-			$$.a = newast('/', $1.a,$3.a); 
-			evalprint($$.a);
+			$$.node = newast('/', $1.node,$3.node); 
+			evalprint($$.node);
 
 			printf(YEL"DIVISION of %s type \n"RESET, $$.type);
 		} 
@@ -436,7 +428,6 @@ calc: calc ADD calc
 | calc BIG_THAN calc 
 {
 	printf(YEL"\nBIGGER THAN condition\n" RESET);
-	$$.globalBoolCond = 1;
 
 	if ($1.value > $3.value) {
 		$$.booleanCond = 1;
@@ -457,7 +448,6 @@ calc: calc ADD calc
 } 
 | calc LES_THAN calc {
 	printf(YEL "\NLESS THAN condition.\n" RESET);
-	$$.globalBoolCond = 1;
 	if ($1.value < $3.value) {
 		$$.booleanCond =1;
 		$$.f = $$.booleanCond;
@@ -475,7 +465,6 @@ calc: calc ADD calc
 }
 | calc EQUALS calc {
 	printf(YEL "EQUALS condition\n" RESET);
-	$$.globalBoolCond = 1;
 
 	if ($1.value == $3.value) 
 	{
@@ -496,7 +485,7 @@ calc: calc ADD calc
 
 | INTEGERNUM 
 { 
-	$$.a = newnum($1);
+	$$.node = newnum($1);
 	$$.value = $1;
 	$$.type = " integer";
 	$$.globalNumCounter = $$.globalNumCounter +1;
@@ -505,7 +494,7 @@ calc: calc ADD calc
 
 | REALNUM 
 {
-	$$.a= newnum($1);
+	$$.node= newnum($1);
 	$$.dvalue = $1; $$.type = "real";
 }
 
@@ -523,7 +512,7 @@ calc: calc ADD calc
 	{
 		$$.valid = 0;
 		$$.value = getvalsymNum($1);
-		$$.a= newnum($$.value);
+		$$.node= newnum($$.value);
 		$$.globalNumCounter = $$.globalNumCounter +1;
 		numCounter($$.globalNumCounter, $$.value );
 
@@ -558,13 +547,13 @@ Fun: RETURN IDENTIFIER {
 	{
 		printf("The variable %s has not been defined \n", $2);
 		printf(RED"\nERROR"RESET" -- Referencing of undefined variable.");
-		printf("\nExiting with "RED"errors."RESET"\n");
+		printf("\nExiting with "RED"errors"RESET".\n");
 		exit(1);
 	} 
 	else 
 	{
 		printf("It has at least one return\n");
-		if (strcmp(globalType, gettypesymText($2)) == 0) 
+		if (strcmp($$.type, gettypesymText($2)) == 0) 
 		{
 			printf("The return type is corret --> "GRN" CORRECT "RESET" \n");		
 		}
@@ -587,19 +576,17 @@ factor: INTEGERNUM
 
 while_loop: WHILE calc LOOP sentence  ENDLOOP SEMI_COLUMN 
 { 
-	fprintf(yyout, "\n");
-	fprintf(yyout, ".data\n");
+	$$.node = newast('W', $2.node, $4.node);
 	dataOper($2.f);
-	fprintf(yyout, ".text\n");
 	textWhile($$.globalSignCond, $$.f);
-	$$.globalNumCounter = 0;
-	$$.globalBoolCond = 0;
-
-	fprintf(yyout, "\n");
 }
 ;
 
-for_loop: FOR factor IN iter_range LOOP sentence ENDLOOP SEMI_COLUMN
+for_loop: FOR IDENTIFIER IN iter_range LOOP sentence ENDLOOP SEMI_COLUMN {
+	$$.node = newast('W', $2, $6.node);
+
+	printf("BUCLE FOOR\n");
+}
 ;
 
 iter_range: factor RANGE factor 
@@ -640,7 +627,7 @@ int main(int argc, char *argv[])
 		}
 		else 
 		{
-			yyout = fopen("./out.asm", "wt");
+			yyout = fopen("./out.nodesm", "wt");
 		}
 		if (file_isreg(argv[1]) == 1)
 			yyin = fopen(argv[1], "rt");
