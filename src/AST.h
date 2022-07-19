@@ -147,7 +147,6 @@ double evalF(struct flow *f)
       v = 0.0;
       if(f->tl) 
       {
-        printf("no entra ");
         while( eval(f->cond) != 0)
           v = eval(f->tl);
       }
@@ -492,7 +491,7 @@ void textWhile(char signo, struct flow *f)
   fprintf(yyout,"syscall\n");
 }
 
-void contadorNumeros(int contador, int val) 
+void numCounter(int contador, int val) 
 {
   globalNumCounter = contador;
   datos[globalNumCounter] = val;

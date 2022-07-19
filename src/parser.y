@@ -23,14 +23,7 @@
 extern FILE *yyin;
 extern FILE *yyout;
 
-int globalError 	 = 0;
-int globalNumCounter = 0;
-int globalOpCounter  = 0;
-int globalBoolCond 	 = 0;
-int compiling_ok     = 0;
-char globalSignCond;
-char *globalType;
-
+int compiling_ok = 0;
 
 /**** 	NUMBERS		****/
 
@@ -98,7 +91,7 @@ Update_SymText( char *sym_name, char *sym_text  )
   	}
 }
 
-
+char *globalType;
 %}
 
 %union 
@@ -109,10 +102,15 @@ Update_SymText( char *sym_name, char *sym_text  )
 	struct 
 	{
 		char *type;
+		char *globalType;
+		char globalSignCond;
 		int value;
 		double dvalue;
 		char *text;
  		int booleanCond;
+		int globalNumCounter;
+		int globalBoolCond;
+		int valid;
 		struct ast *a;
 		struct flow *f;
 		struct fncall *fun;
@@ -121,12 +119,12 @@ Update_SymText( char *sym_name, char *sym_text  )
 
 %token ADD SUBS MULT DIV LEFT_P RIGHT_P IF THEN BIG_THAN LES_THAN ELSE PROCEDURE IS END START COLUMN INTEGER FLOAT STRING BOOLEAN IDENTIFICADORSYMB LEFTP_COM COL_EQUAL RIGHTP_COM PUTLINE ENDIF TRUE FALSE LINE_COMMENT WHILE LOOP ENDLOOP EQUALS FOR IN RANGE FUNCTION RETURN SEMI_COLUMN
 
-%left ADD SUBS
-%left MULT DIV
+%left ADD 	SUBS
+%left MULT 	DIV
 
-%token <number> INTEGERNUM 
-%token <numberf> REALNUM
-%token <string> IDENTIFIER
+%token <number> 	INTEGERNUM 
+%token <numberf> 	REALNUM
+%token <string> 	IDENTIFIER
 
 %type<snum> while_loop if_sentence func_name statement calc expr Fun function
 
@@ -183,9 +181,10 @@ statements: statements  statement
 statement: IDENTIFIER COLUMN type SEMI_COLUMN 
 { 
 	printf("The variable %s gets defined \n", $1);
-	$$.text = $1; add_SymText ( $$.text, $$.text, globalType);
+	$$.text = $1; add_SymText( $$.text, $$.text, globalType);
 }
 ;
+
 
 
 type: INTEGER {
@@ -211,23 +210,22 @@ sentence: sentence  expr
 ;
 
 expr: IDENTIFIER COL_EQUAL calc SEMI_COLUMN {
-	if (globalBoolCond == 0) {
-		globalBoolCond = 0;
+	if ($$.globalBoolCond == 0) {
+		$$.globalBoolCond = 0;
  		fprintf(yyout, "\n");
  		fprintf(yyout, ".data\n");
 		dataOper($3.a);
  		fprintf(yyout, ".text\n");
 		textOper($3.a);
  		fprintf(yyout, "\n");
-		globalNumCounter = 0;
-		globalOpCounter  = 0;
-		globalBoolCond   = 0;
+		$$.globalNumCounter = 0;
+		$$.globalBoolCond   = 0;
 	}
 
 
 	$$.text= $1;
 
-	if (!globalError) 
+	if (!$$.valid) 
 	{ 
 		if (!getvalsymText($$.text)) 
 		{
@@ -246,7 +244,7 @@ expr: IDENTIFIER COL_EQUAL calc SEMI_COLUMN {
 	} 
 	else 
 	{ 
-		globalError = 0;
+		$$.valid = 0;
 	}
 
 }
@@ -269,12 +267,10 @@ if_sentence: IF calc THEN sentence ENDIF SEMI_COLUMN
 	fprintf(yyout, "\n");
 	fprintf(yyout, ".data\n");
 	dataOper($2.a);
-	fprintf(yyout, ".text\n");
-	textIf(globalSignCond,$2.f);
+ 	textIf($$.globalSignCond,$2.f);
 	fprintf(yyout, "\n");
-	globalNumCounter = 0;
-	globalOpCounter  = 0;
-	globalBoolCond   = 0;
+	$$.globalNumCounter = 0;
+	$$.globalBoolCond   = 0;
 }
 
 | IF calc THEN sentence ELSE sentence ENDIF SEMI_COLUMN 
@@ -283,26 +279,23 @@ if_sentence: IF calc THEN sentence ENDIF SEMI_COLUMN
 	fprintf(yyout, ".data\n");
 	dataOper($2.a);
 	fprintf(yyout, ".text\n");
-	textIf(globalSignCond,$2.f);
+	textIf($$.globalSignCond,$2.f);
 	fprintf(yyout, "\n");
-	globalNumCounter = 0;
-	globalOpCounter  = 0;
-	globalBoolCond 	 = 0;
+	$$.globalNumCounter = 0;
+	$$.globalBoolCond   = 0;
 }
 ;
 
 calc: calc ADD calc 
 { 
-	globalOpCounter = globalOpCounter + 1;
 
-	if (!globalError)
+	if (!$$.valid)
 	{
 		if (($1.type == " integer") && ($3.type == " integer")) 
 		{
 			$$.a = newast('+', $1.a,$3.a); 
 			evalprint($$.a);
 			globalType = $1.type;
-			opCounter(globalOpCounter, $$.a);
 			printf(YEL"ADD ON of %s type \n" RESET, $$.type);
 		} 
 		else if (($1.type == "real") && ($3.type == "real"))
@@ -310,7 +303,6 @@ calc: calc ADD calc
 			$$.a = newast('+', $1.a,$3.a); 
 			evalprint($$.a);
 			globalType = $1.type;
-			opCounter(globalOpCounter, $$.a);
 			printf(YEL"ADD ON of %s type\n"RESET,  $$.type);
 		} 
 		else if (($1.type == "string") || ($3.type == "string"))
@@ -330,15 +322,13 @@ calc: calc ADD calc
 }
 |  calc SUBS calc 
 { 
-	globalOpCounter = globalOpCounter + 1;
 
-	if (!globalError) 
+	if (!$$.valid) 
 	{
 		if (($1.type == " integer") && ($3.type == " integer")) 
 		{
 			$$.a = newast('-', $1.a,$3.a); 
 			evalprint($$.a);
-			opCounter(globalOpCounter, $$.a);
 
 			printf(YEL"SUBTRACTION of %s type \n"RESET, $$.type);
 		} 
@@ -346,7 +336,6 @@ calc: calc ADD calc
 		{
 			$$.a = newast('-', $1.a,$3.a); 
 			evalprint($$.a);
-			opCounter(globalOpCounter, $$.a);
 
 			printf(YEL"SUBTRACTION of %s type \n"RESET, $$.type);
 		} 
@@ -368,15 +357,13 @@ calc: calc ADD calc
 
 |  calc MULT calc 
 { 
-	globalOpCounter = globalOpCounter + 1;
 
-	if (globalError == 0) 
+	if ($$.valid == 0) 
 	{ 
 		if (($1.type == " integer") && ($3.type == " integer"))
 		{
 			$$.a = newast('*', $1.a,$3.a); 
 			evalprint($$.a);
-			opCounter(globalOpCounter, $$.a);
 
 			printf(YEL"MULTIPLICATION of %s type \n"RESET, $$.type);
 		} 
@@ -384,7 +371,6 @@ calc: calc ADD calc
 		{
 			$$.a = newast('*', $1.a,$3.a); 
 			evalprint($$.a);
-			opCounter(globalOpCounter, $$.a);
 
 			printf(YEL"MULTIPLICATION of %s type \n"RESET, $$.type);
 		} 
@@ -405,23 +391,21 @@ calc: calc ADD calc
 }
 
 |  calc DIV calc {
-	globalOpCounter = globalOpCounter + 1;
 
 	if (!$3.value)	
 	{ 
 		printf(RED "\nERROR" RESET, 30);
 		printf(" - Can't divide by 0. \n", 30);
 		exit(1);
-		globalError = 1;
+		$$.valid = 1;
 	}
 
-	if (!globalError) 
+	if (!$$.valid) 
 	{ 
 		if (($1.type == " integer") && ($3.type == " integer"))
 		{
 			$$.a = newast('/', $1.a,$3.a); 
 			evalprint($$.a);
-			opCounter(globalOpCounter, $$.a);
 
 			printf(YEL"DIVISION of %s type \n"RESET, $$.type);
 		} 
@@ -429,7 +413,6 @@ calc: calc ADD calc
 		{
 			$$.a = newast('/', $1.a,$3.a); 
 			evalprint($$.a);
-			opCounter(globalOpCounter, $$.a);
 
 			printf(YEL"DIVISION of %s type \n"RESET, $$.type);
 		} 
@@ -453,12 +436,12 @@ calc: calc ADD calc
 | calc BIG_THAN calc 
 {
 	printf(YEL"\nBIGGER THAN condition\n" RESET);
-	globalBoolCond = 1;
+	$$.globalBoolCond = 1;
 
 	if ($1.value > $3.value) {
 		$$.booleanCond = 1;
 		$$.f = $$.booleanCond;
-		globalSignCond = '>';
+		$$.globalSignCond = '>';
 
 		printf("Condition BIGGER THAN is true - Is bigger\n");
 	}
@@ -466,7 +449,7 @@ calc: calc ADD calc
 	{
 		$$.booleanCond = 0;
 		$$.f = $$.booleanCond;
-		globalSignCond = '>';
+		$$.globalSignCond = '>';
 
 		printf("Condition BIGGER THAN is false - It's not bigger \n");
 	}
@@ -474,39 +457,39 @@ calc: calc ADD calc
 } 
 | calc LES_THAN calc {
 	printf(YEL "\NLESS THAN condition.\n" RESET);
-	globalBoolCond = 1;
+	$$.globalBoolCond = 1;
 	if ($1.value < $3.value) {
 		$$.booleanCond =1;
 		$$.f = $$.booleanCond;
-		globalSignCond = '<';
+		$$.globalSignCond = '<';
 
 
 		printf("Condition LESS THAN is true - It's smaller\n");
 	} else {
 		$$.booleanCond = 0;
 		$$.f = $$.booleanCond;
-		globalSignCond = '<';
+		$$.globalSignCond = '<';
 
 		printf( "Condition LESS THAN is false - It's not smaller\n");
 	}
 }
 | calc EQUALS calc {
 	printf(YEL "EQUALS condition\n" RESET);
-	globalBoolCond = 1;
+	$$.globalBoolCond = 1;
 
 	if ($1.value == $3.value) 
 	{
 		printf("Condition EQUALS is true - It's equal\n");
 		$$.booleanCond = 1;
 		$$.f = $$.booleanCond;
-		globalSignCond = '=';
+		$$.globalSignCond = '=';
 	}
 	else
 	{
 		printf("Condition EQUALS is false - It's equal\n");
 		$$.booleanCond = 0;
 		$$.f = $$.booleanCond;
-		globalSignCond = '=';
+		$$.globalSignCond = '=';
 	}
 
 }
@@ -516,8 +499,8 @@ calc: calc ADD calc
 	$$.a = newnum($1);
 	$$.value = $1;
 	$$.type = " integer";
-	globalNumCounter = globalNumCounter +1;
-	contadorNumeros(globalNumCounter, $$.value );
+	$$.globalNumCounter = $$.globalNumCounter +1;
+	numCounter($$.globalNumCounter, $$.value );
 }
 
 | REALNUM 
@@ -532,17 +515,17 @@ calc: calc ADD calc
 
 	if (!getvalsymText($1))
 	{
-		globalError = 1;
+		$$.valid = 1;
 		printf("The variable %s does NOT exist \n", $1);
 
 	} 
 	else 
 	{
-		globalError = 0;
+		$$.valid = 0;
 		$$.value = getvalsymNum($1);
 		$$.a= newnum($$.value);
-		globalNumCounter = globalNumCounter +1;
-		contadorNumeros(globalNumCounter, $$.value );
+		$$.globalNumCounter = $$.globalNumCounter +1;
+		numCounter($$.globalNumCounter, $$.value );
 
 		printf("The variable %s does exist \n", $1);		
 	}
@@ -608,10 +591,9 @@ while_loop: WHILE calc LOOP sentence  ENDLOOP SEMI_COLUMN
 	fprintf(yyout, ".data\n");
 	dataOper($2.f);
 	fprintf(yyout, ".text\n");
-	textWhile(globalSignCond, $$.f);
-	globalNumCounter = 0;
-	globalOpCounter = 0;
-	globalBoolCond = 0;
+	textWhile($$.globalSignCond, $$.f);
+	$$.globalNumCounter = 0;
+	$$.globalBoolCond = 0;
 
 	fprintf(yyout, "\n");
 }
