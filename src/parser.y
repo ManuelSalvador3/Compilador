@@ -123,7 +123,7 @@ char *parsedType;
 %token <numberf> 	REALNUM
 %token <string> 	IDENTIFIER
 
-%type<snum> while_loop if_sentence for_loop func_name statement calc sentence expr Fun function
+%type<snum> while_loop if_sentence for_loop func_name statement calc sentence expr Fun function put_line
 
 
 %start comp
@@ -139,9 +139,12 @@ comp: body
 body: initproc expression endproc;
 
 
-initproc: PROCEDURE var_name IS    { printf(BLU"START OF THE PROCEDURE "RESET"-- \n\n");   };
+initproc: PROCEDURE var_name IS    { 
+	
+	printf(BLU"START OF THE PROCEDURE "RESET"-- \n\n");   };
 
-endproc: END func_name SEMI_COLUMN { printf("--- \n"BLU"END OF THE PROCEDURE "RESET"\n\n"); };
+endproc: END func_name SEMI_COLUMN { 
+	printf("--- \n"BLU"END OF THE PROCEDURE "RESET"\n\n"); };
 
 var_name: IDENTIFIER 
 {
@@ -167,7 +170,9 @@ expression: statements  beginning  sentence {}
 ;
 
 
-beginning: START {printf("###########################\n "YEL"BEGIN"RESET" \n###########################\n\n");}
+beginning: START {
+	fprintf(yyout, "\n.text \n");
+	printf("###########################\n "YEL"BEGIN"RESET" \n###########################\n\n");}
 ;
 
 
@@ -181,7 +186,8 @@ statement: IDENTIFIER COLUMN type SEMI_COLUMN
 	$$.text = $1; 
 	$$.type = parsedType;
 	add_SymText($$.text, $$.text, $$.type);
-
+	// fprintf(yyout, )
+	// fprintf(yyout, "%s", newnum($$.type[0]));
 	$$.node = newast('D', $1, newnum($$.type[0]));
 	evalprint($$.node);	
 }
@@ -247,7 +253,7 @@ expr: IDENTIFIER COL_EQUAL calc SEMI_COLUMN {
 	globalNumCounter = 0;
 }
 
-| PUTLINE LEFTP_COM IDENTIFIER RIGHTP_COM SEMI_COLUMN 	{ printf("Put_Line\n");   }
+| put_line 	{ printf("Put_Line\n");   }
 | IDENTIFIER COL_EQUAL factor SEMI_COLUMN 				{ printf("Asignacion\n"); }
 | LINE_COMMENT 	{ printf("COMMENT \n");		 }
 | while_loop 	{ printf("WHILE LOOP \n\n"); }
@@ -259,8 +265,16 @@ expr: IDENTIFIER COL_EQUAL calc SEMI_COLUMN {
 if_sentence: IF calc THEN sentence ENDIF SEMI_COLUMN 
 {
 	$$.node = newast('I', $2.node, $4.node);
-	dataOper($2.node);
- 	textIf($$.globalSignCond,$2.f);
+
+	// expr: IDENTIFIER COL_EQUAL calc SEMI_COLUMN {
+	// $$.node = newast('A', $1, $3.node);
+	// $$.node->type = $$.type[0];
+
+	// $$.node
+	// fprintf(yyout, "\n%s\n", $$.type[0]);
+	evalprint($$.node);
+	// dataOper($2.node);
+ 	// textIf($$.globalSignCond,$2.f);
 }
 
 | IF calc THEN sentence ELSIF calc THEN sentence ELSE sentence ENDIF SEMI_COLUMN
@@ -577,10 +591,29 @@ factor: INTEGERNUM
 while_loop: WHILE calc LOOP sentence  ENDLOOP SEMI_COLUMN 
 { 
 	$$.node = newast('W', $2.node, $4.node);
+	evalprint($$.node);
 	dataOper($2.f);
-	textWhile($$.globalSignCond, $$.f);
+	
+	
 }
 ;
+
+put_line: PUTLINE LEFT_P IDENTIFIER RIGHT_P SEMI_COLUMN {
+	// printf("Test de que funciona el PUT LINE");
+	symbolRec *s;
+   	s = getsymNum ($3,NULL);
+	//Saca el tipo de datos que es
+	fprintf(yyout, "%s", $3); //El resultado es el nombre de la variable
+	
+	//Con eso puedo sacar el tipo
+	//$1.type == " integer")
+	// printf("A: %s, B: %d", s->name, s->num);
+	$$.node = newnum(s->num);
+	$$.node = newast('P', $3, $$.node);
+	evalprint($$.node);
+	
+	//Hacer la mierda necesaria 
+}
 
 for_loop: FOR IDENTIFIER IN iter_range LOOP sentence ENDLOOP SEMI_COLUMN {
 	$$.node = newast('W', $2, $6.node);
@@ -628,6 +661,7 @@ int main(int argc, char *argv[])
 		else 
 		{
 			yyout = fopen("./out.nodesm", "wt");
+			fprintf(yyout, ".data \n");
 		}
 		if (file_isreg(argv[1]) == 1)
 			yyin = fopen(argv[1], "rt");
