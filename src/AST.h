@@ -79,7 +79,7 @@ struct ast * newast(int nodetype, struct ast *l, struct ast *r)
   node->r = r;
 
   printf(TES"NEW AST NODE OF TYPE -> \" %s \" || \n  "RESET, node);
-
+  printf("%d", node->nodetype);
   return node;
 }
 
@@ -156,6 +156,15 @@ double evalF(struct flow *f)
           v = eval(f->tl);
       }
     break;
+    case 'F':
+    //POR HACER
+    //   v = 0.0;
+    //   if(f->tl) 
+    //   {
+    //     while( eval(f->cond) != 0)
+    //       v = eval(f->tl);
+    //   }
+    // break;
     case 'I':
       if( eval( (f->cond) != 0)) 
       {
@@ -238,12 +247,13 @@ struct ast * newfunc(int functype, struct ast *l)
 
 void dataOper( struct ast *a)
 {
-  for(int i = 1; i <= globalNumCounter; ++i)
-  {
-    fprintf(yyout, "number%d: ", globalNumCounter-i+1);
-    fprintf(yyout, ".word %d\n", datos[i]);
-  }
-  fprintf(yyout, "message: .asciiz \"FIN\"\n");
+  // fprintf(yyout, ".data\n");
+  // for(int i = 1; i <= globalNumCounter; ++i)
+  // {
+  //   fprintf(yyout, "number%d: ", globalNumCounter-i+1);
+  //   fprintf(yyout, ".word %d\n", datos[i]);
+  // }
+  
 }
 
 void textOper(struct ast *a) 
@@ -302,198 +312,199 @@ void textOper(struct ast *a)
 
   fprintf(yyout,"li $v0, 1\n");
   fprintf(yyout,"add $a0, $zero, $t%d\n", valFin-2);
-  fprintf(yyout,"syscall\n");
+  // fprintf(yyout,"syscall\n");
 }
 
 void textIf(char signo, struct flow *f) 
 {
   int valFin =0;
 
-  for(int i = 0; i < 2; ++i)
-    fprintf(yyout, "addi $t%d, $zero, %d\n", i, datos[i+1]);
+  // for(int i = 0; i < 2; ++i)
+  //   fprintf(yyout, "addi $t%d, $zero, %d\n", i, datos[i+1]);
 
-  if ( signo == '<') 
-  {
-    fprintf(yyout, "blt $t0, $t1, operation\n");
-  }
-  else if (signo == '>') 
-  {
-    fprintf(yyout, "bgt $t0, $t1, operation\n");
-  }
-  else if (signo == '=')
-  {
-    fprintf(yyout, "beq $t0, $t1, operation\n");
-  }
+  // if ( signo == '<') 
+  // {
+  //   fprintf(yyout, "blt $t0, $t1, operation\n");
+  // }
+  // else if (signo == '>') 
+  // {
+  //   fprintf(yyout, "bgt $t0, $t1, operation\n");
+  // }
+  // else if (signo == '=')
+  // {
+  //   fprintf(yyout, "beq $t0, $t1, operation\n");
+  // }
 
-  fprintf(yyout, "li $v0, 10\n");
-  fprintf(yyout, "syscall\n");
-  fprintf(yyout, "operation:\n");
+  // fprintf(yyout, "li $v0, 10\n");
+  // fprintf(yyout, "syscall\n");
+  // fprintf(yyout, "operation:\n");
 
-  int x=2;
+  // int x=2;
 
-  for(int i = 0; i < globalNumCounter-2; ++i)
-  {
-    fprintf(yyout, "lw $t%d", x);
-    fprintf(yyout, ", number%d", i+1);
-    fprintf(yyout, "($zero)\n");
-    x++;
-  }
+  // for(int i = 0; i < globalNumCounter-2; ++i)
+  // {
+  //   fprintf(yyout, "lw $t%d", x);
+  //   fprintf(yyout, ", number%d", i+1);
+  //   fprintf(yyout, "($zero)\n");
+  //   x++;
+  // }
 
 
-  int j =0;
-  int m =2;
+  // int j =0;
+  // int m =2;
 
-  int NumOp = globalNumCounter - 2;
+  // int NumOp = globalNumCounter - 2;
 
-  for(int i = 1; i <= globalOpCounter; ++i) 
-  {
-    switch(operadores[i]) 
-    {
-      case '+':
-        fprintf(yyout,"add $t%d, $t%d, $t%d\n", NumOp+m, NumOp-j+1, NumOp-j);
-        j = j +2;
-        m = m +2;
-        valFin =NumOp+j;
-      break;
+  // for(int i = 1; i <= globalOpCounter; ++i) 
+  // {
+  //   switch(operadores[i]) 
+  //   {
+  //     case '+':
+  //       fprintf(yyout,"add $t%d, $t%d, $t%d\n", NumOp+m, NumOp-j+1, NumOp-j);
+  //       j = j +2;
+  //       m = m +2;
+  //       valFin =NumOp+j;
+  //     break;
 
-      case '-':
-        fprintf(yyout,"sub $t%d, $t%d, $t%d\n", NumOp+m, NumOp-j+1, NumOp-j);
-        j = j +2;
-        m = m +2;
-        valFin =NumOp+j;
-      break;
+  //     case '-':
+  //       fprintf(yyout,"sub $t%d, $t%d, $t%d\n", NumOp+m, NumOp-j+1, NumOp-j);
+  //       j = j +2;
+  //       m = m +2;
+  //       valFin =NumOp+j;
+  //     break;
       
-      case '*':
-        fprintf(yyout,"mul $t%d, $t%d, $t%d\n", NumOp+m, NumOp-j+1, NumOp-j );
-        j = j +2;
-        m = m +2;
-        valFin =NumOp+j;
-      break;
+  //     case '*':
+  //       fprintf(yyout,"mul $t%d, $t%d, $t%d\n", NumOp+m, NumOp-j+1, NumOp-j );
+  //       j = j +2;
+  //       m = m +2;
+  //       valFin =NumOp+j;
+  //     break;
 
-      case '/':
-        fprintf(yyout,"div $t%d, $t%d, $t%d\n", NumOp+m, NumOp-j+1, NumOp-j);
-        j = j +2;
-        valFin =NumOp+j;
-        m = m +2;
-      break;
-    }
-  }
+  //     case '/':
+  //       fprintf(yyout,"div $t%d, $t%d, $t%d\n", NumOp+m, NumOp-j+1, NumOp-j);
+  //       j = j +2;
+  //       valFin =NumOp+j;
+  //       m = m +2;
+  //     break;
+  //   }
+  // }
 
-  fprintf(yyout,"li $v0, 1\n");
-  int h =0;
+  // fprintf(yyout,"li $v0, 1\n");
+  // int h =0;
   
-  for(int i = 0; i < globalOpCounter; ++i) 
-  {
-    fprintf(yyout,"add $a0, $zero, $t%d\n", valFin-h);
-    fprintf(yyout,"syscall\n");
-    h = h+2;
-  }
+  // for(int i = 0; i < globalOpCounter; ++i) 
+  // {
+  //   fprintf(yyout,"add $a0, $zero, $t%d\n", valFin-h);
+  //   fprintf(yyout,"syscall\n");
+  //   h = h+2;
+  // }
 
-  fprintf(yyout,"li $v0, 10\n");
-  fprintf(yyout,"syscall\n"); 
+  // fprintf(yyout,"li $v0, 10\n");
+  // fprintf(yyout,"syscall\n"); 
 }
 
 void textWhile(char signo, struct flow *f)
 {
-  int valFin =0;
+  // int valFin =0;
 
-  for(int i = 0; i < 2; ++i) 
-  {
-    fprintf(yyout, "addi $t%d, $zero, %d\n", i, datos[i+1]);
-  }
-  fprintf(yyout, "while:\n");
+  // fprintf(yyout, "%s", signo);
+  // for(int i = 0; i < 2; ++i) 
+  // {
+  //   fprintf(yyout, "addi $t%d, $zero, %d\n", i, datos[i+1]);
+  // }
+  // fprintf(yyout, "while:\n");
 
-  if ( signo == '>') 
-  {
-    fprintf(yyout, "blt $t0, $t1, exit\n");
-  } 
-  else if (signo == '<')
-  {
-    fprintf(yyout, "bgt $t0, $t1, exit\n");
-  } 
-  else if (signo == '=')
-  {
-    fprintf(yyout, "beq $t0, $t1, exit\n");
-  }
+  // if ( signo == '>') 
+  // {
+  //   fprintf(yyout, "blt $t0, $t1, exit\n");
+  // } 
+  // else if (signo == '<')
+  // {
+  //   fprintf(yyout, "bgt $t0, $t1, exit\n");
+  // } 
+  // else if (signo == '=')
+  // {
+  //   fprintf(yyout, "beq $t0, $t1, exit\n");
+  // }
 
-  fprintf(yyout, "jal  operation\n");
-  fprintf(yyout, "addi $t0, $t0, 1\n");
-  fprintf(yyout, "j while\n");
+  // fprintf(yyout, "jal  operation\n");
+  // fprintf(yyout, "addi $t0, $t0, 1\n");
+  // fprintf(yyout, "j while\n");
   
-  fprintf(yyout, "exit:\n");
-  fprintf(yyout, "li $v0, 4\n");
-  fprintf(yyout, "la $a0, message\n");
-  fprintf(yyout, "syscall\n");
-  fprintf(yyout, "li $v0, 10\n");
-  fprintf(yyout, "syscall\n");
+  // fprintf(yyout, "exit:\n");
+  // fprintf(yyout, "li $v0, 4\n");
+  // fprintf(yyout, "la $a0, message\n");
+  // fprintf(yyout, "syscall\n");
+  // fprintf(yyout, "li $v0, 10\n");
+  // fprintf(yyout, "syscall\n");
 
-  fprintf(yyout, "operation:\n");
-  int x=2;
+  // fprintf(yyout, "operation:\n");
+  // int x=2;
   
-  for(int i = 0; i < globalNumCounter-2; ++i)
-  {
-    fprintf(yyout, "lw $t%d", x);
-    fprintf(yyout, ", number%d", i+1);
-    fprintf(yyout, "($zero)\n");
-    x++;
-  }
+  // for(int i = 0; i < globalNumCounter-2; ++i)
+  // {
+  //   fprintf(yyout, "lw $t%d", x);
+  //   fprintf(yyout, ", number%d", i+1);
+  //   fprintf(yyout, "($zero)\n");
+  //   x++;
+  // }
 
-  double v;
-  int flag = 0;
-  int NumOp = globalNumCounter-2;
-  int j =0;
-  int m =2;
+  // double v;
+  // int flag = 0;
+  // int NumOp = globalNumCounter-2;
+  // int j =0;
+  // int m =2;
 
   
-  for(int i = 1; i <= globalOpCounter; ++i)
-  {
-    switch(operadores[i]) 
-    {
-      case '+':
-        //fprintf(yyout, "suma\n");
-        fprintf(yyout,"add $t%d, $t%d, $t%d\n", NumOp+m, NumOp-j+1, NumOp-j);
-        j = j +2;
-        m = m +2;
-        valFin =NumOp+j;
-      break;
+  // for(int i = 1; i <= globalOpCounter; ++i)
+  // {
+  //   switch(operadores[i]) 
+  //   {
+  //     case '+':
+  //       fprintf(yyout, "suma\n");
+  //       fprintf(yyout,"add $t%d, $t%d, $t%d\n", NumOp+m, NumOp-j+1, NumOp-j);
+  //       j = j +2;
+  //       m = m +2;
+  //       valFin =NumOp+j;
+  //     break;
 
-      case '-':
-        //fprintf(yyout, "resta\n");
-        fprintf(yyout,"sub $t%d, $t%d, $t%d\n", NumOp+m, NumOp-j+1, NumOp-j);
-        j = j +2;
-        m = m +2;
-        valFin =NumOp+j;
-      break;
+  //     case '-':
+  //       fprintf(yyout, "resta\n");
+  //       fprintf(yyout,"sub $t%d, $t%d, $t%d\n", NumOp+m, NumOp-j+1, NumOp-j);
+  //       j = j +2;
+  //       m = m +2;
+  //       valFin =NumOp+j;
+  //     break;
 
-      case '*':
-        //fprintf(yyout, "multiplicacion\n");
-        fprintf(yyout,"mul $t%d, $t%d, $t%d\n", NumOp+m, NumOp-j+1, NumOp-j );
-        j = j +2;
-        m = m +2;
-        valFin =NumOp+j;
-      break;
+  //     case '*':
+  //       fprintf(yyout, "multiplicacion\n");
+  //       fprintf(yyout,"mul $t%d, $t%d, $t%d\n", NumOp+m, NumOp-j+1, NumOp-j );
+  //       j = j +2;
+  //       m = m +2;
+  //       valFin =NumOp+j;
+  //     break;
       
-      case '/':
-        //fprintf(yyout, "multiplicacion\n");
-        fprintf(yyout,"div $t%d, $t%d, $t%d\n", NumOp+m, NumOp-j+1, NumOp-j);
-        j = j +2;
-        valFin =NumOp+j;
-        m = m +2;
-      break;
-    }
-  }
+  //     case '/':
+  //       fprintf(yyout, "multiplicacion\n");
+  //       fprintf(yyout,"div $t%d, $t%d, $t%d\n", NumOp+m, NumOp-j+1, NumOp-j);
+  //       j = j +2;
+  //       valFin =NumOp+j;
+  //       m = m +2;
+  //     break;
+  //   }
+  // }
  
-  fprintf(yyout,"li $v0, 1\n");
-  int h =0;
-  for(int i = 0; i < globalOpCounter; ++i) 
-  {
-    fprintf(yyout,"add $a0, $zero, $t%d\n", valFin-h);
-    fprintf(yyout,"syscall\n");
-    h = h+2;
-  }
+  // fprintf(yyout,"li $v0, 1\n");
+  // int h =0;
+  // for(int i = 0; i < globalOpCounter; ++i) 
+  // {
+  //   fprintf(yyout,"add $a0, $zero, $t%d\n", valFin-h);
+  //   fprintf(yyout,"syscall\n");
+  //   h = h+2;
+  // }
 
-  fprintf(yyout,"jr $ra\n");
-  fprintf(yyout,"syscall\n");
+  // fprintf(yyout,"jr $ra\n");
+  // fprintf(yyout,"syscall\n");
 }
 
 void numCounter(int contador, int val) 
@@ -512,12 +523,13 @@ double evalprint(struct ast *a)
 {
   double v;
   int count = 0;
- 
+  
   switch(a->nodetype) 
   {
     case 'K':
       v = ((struct numval *)a)->number;
     break;
+    
 
     case 'D': // Declaration
       switch(a->r->number) {
@@ -540,39 +552,66 @@ double evalprint(struct ast *a)
       
       break;
 
-    case 'A': // Assignment 
-      printf(TES"NEW AST NODE OF TYPE -> \" %d \" || \n  "RESET, a->nodetype);
+    case 'P':
+      // printf(TES"TEST TEST TEST TEST TEST TEST\n  "RESET);
 
-      switch(a->type) {
-        case 'f': // Float
-          fprintf(yyout, "%s: .float %4.4g \n", a->l, eval(a->r));
-          break;
-        case 'i': // Integer
-          fprintf(yyout, "%s: .word %4.4g \n", a->l, eval(a->r));
-          break;
-        case 's': // String
-          fprintf(yyout, "%s: .asciiz %4.4g \n", a->l, eval(a->r));
-          break;
-        case 'b': // Boolean
-          fprintf(yyout, "%s: .asciiz %4.4g \n", a->l, eval(a->r));
-          break;
-        default: 
-          printf("internal error: bad value type of node %c\n", a->nodetype); 
-          break;
+      if(fmod(eval(a->r), 1)){
+         // fprintf(yyout, "TEST DEL VALOR %4.4g \n",  eval(a->r));
+        fprintf(yyout, "\nli $v0 2 \n");
+        fprintf(yyout, "add $a0, $zero, %4.4g \n",eval(a->r));
+        fprintf(yyout, "syscall \n");
+      } else {
+        // fprintf(yyout, "TEST DEL VALOR %4.4g \n",  eval(a->r));
+        fprintf(yyout, "\nli $v0 1 \n");
+        fprintf(yyout, "add $a0, $zero, %4.4g \n",eval(a->r));
+        fprintf(yyout, "syscall \n");
       }
+      
       break;
+
+    // case 'A': // Assignment 
+    //   printf(TES"NEW AST NODE OF TYPE -> \" %d \" || \n  "RESET, a->nodetype);
+
+    //   switch(a->type) {
+    //     case 'f': // Float
+    //       fprintf(yyout, "%s: .float %4.4g \n", a->l, eval(a->r));
+    //       break;
+    //     case 'i': // Integer
+    //       fprintf(yyout, "%s: .word %4.4g \n", a->l, eval(a->r));
+    //       break;
+    //     case 's': // String
+    //       fprintf(yyout, "%s: .asciiz %4.4g \n", a->l, eval(a->r));
+    //       break;
+    //     case 'b': // Boolean
+    //       fprintf(yyout, "%s: .asciiz %4.4g \n", a->l, eval(a->r));
+    //       break;
+    //     default: 
+    //       printf("internal error: bad value type of node %c\n", a->nodetype); 
+    //       break;
+    //   }
+    //   break;
 
     case 'I':
       printf(TES"NEW AST NODE OF TYPE -> \" %d \" || \n  "RESET, a->nodetype);
+      //ESTAS EN EL IF
+      //sacar el simbolo de compracion
+
       break;
 
     case 'W':
       printf(TES"NEW AST NODE OF TYPE -> \" %d \" || \n  "RESET, a->nodetype);
+      //fprintf(yyout, "\nwhile:\n");
+      //printf("%d", eval(a->l.globalSignCond));
+
+      //codigo mips
+      //while:
+      //comparacion de valores
+      //
       break;
 
     case '+': 
       globalOperacion1="add XX %lf %lf \n", eval(a->l),eval(a->r);
-      fprintf(yyout,"syscall\n");
+      // fprintf(yyout,"syscall\n");
 
       v = eval(a->l) + eval(a->r);  
     break;
