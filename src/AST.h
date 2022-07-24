@@ -82,7 +82,7 @@ struct ast * newast(int nodetype, struct ast *l, struct ast *r)
   return node;
 }
 
-struct ast * newnum(int d) 
+struct ast * newnum_ast(int d) 
 {
   struct ast *a = malloc(sizeof(struct ast));
 
@@ -95,6 +95,21 @@ struct ast * newnum(int d)
   a->number = d;
 
   return a;
+}
+
+struct ast * newnum(int d) 
+{
+  struct numval *a = malloc(sizeof(struct ast));
+
+  if(!a) 
+  {
+    yyerror("out of space");
+    exit(0); 
+  }
+  a->nodetype = 'K';
+  a->number = d;
+
+  return (struct ast *) a;
 }
 
 double eval(struct ast *a) 

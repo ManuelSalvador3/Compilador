@@ -187,7 +187,7 @@ statement: IDENTIFIER COLUMN type SEMI_COLUMN
 	$$.type = parsedType;
 	add_SymText($$.text, $$.text, $$.type);
 
-	$$.node = newast('D', $1, newnum($$.type[0]));
+	$$.node = newast('D', $1, newnum_ast($$.type[0]));
 	evalprint($$.node);	
 }
 ;
