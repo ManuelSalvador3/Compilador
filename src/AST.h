@@ -78,14 +78,14 @@ struct ast * newast(int nodetype, struct ast *l, struct ast *r)
   node->l = l;
   node->r = r;
 
-  printf(TES"NEW AST NODE OF TYPE -> \" %s \" || \n  "RESET, node);
-  printf("%d", node->nodetype);
+  printf(TES"NEW AST NODE OF TYPE -> \" %s \" || \n"RESET, node);
   return node;
 }
 
 struct ast * newnum(int d) 
 {
-  struct numval *a = malloc(sizeof(struct numval));
+  struct ast *a = malloc(sizeof(struct ast));
+
   if(!a) 
   {
     yyerror("out of space");
@@ -94,7 +94,7 @@ struct ast * newnum(int d)
   a->nodetype = 'K';
   a->number = d;
 
-  return (struct ast *)a;
+  return a;
 }
 
 double eval(struct ast *a) 
@@ -533,16 +533,16 @@ double evalprint(struct ast *a)
 
     case 'D': // Declaration
       switch(a->r->number) {
-        case 'F': // Float
+        case 'f': // Float
           fprintf(yyout, "%s: .float\n", a->l);
           break;
-        case '1': // Integer
+        case 'i': // Integer
           fprintf(yyout, "%s: .word \n", a->l);
           break;
-        case 'S': // String
+        case 's': // String
           fprintf(yyout, "%s: .asciiz \n", a->l);
           break;
-        case 'B': // Boolean
+        case 'b': // Boolean
           fprintf(yyout, "%s: .word \n", a->l);
           break;
         default: 
@@ -553,60 +553,71 @@ double evalprint(struct ast *a)
       break;
 
     case 'P':
-      // printf(TES"TEST TEST TEST TEST TEST TEST\n  "RESET);
-
-      if(fmod(eval(a->r), 1)){
+      if((eval(a->r))){
          // fprintf(yyout, "TEST DEL VALOR %4.4g \n",  eval(a->r));
-        fprintf(yyout, "\nli $v0 2 \n");
+        fprintf(yyout, "\nli $v0 1 \n");
         fprintf(yyout, "add $a0, $zero, %4.4g \n",eval(a->r));
         fprintf(yyout, "syscall \n");
       } else {
         // fprintf(yyout, "TEST DEL VALOR %4.4g \n",  eval(a->r));
-        fprintf(yyout, "\nli $v0 1 \n");
+        fprintf(yyout, "\nli $v0 2 \n");
         fprintf(yyout, "add $a0, $zero, %4.4g \n",eval(a->r));
         fprintf(yyout, "syscall \n");
+
       }
+      fprintf(yyout, "la $a0, '\\n' \n");
+      fprintf(yyout, "li $v0, 11 \n");
+      fprintf(yyout, "syscall \n\n");
       
       break;
 
-    // case 'A': // Assignment 
-    //   printf(TES"NEW AST NODE OF TYPE -> \" %d \" || \n  "RESET, a->nodetype);
+    case 'A': // Assignment 
+      printf(TES"NEW AST NODE OF TYPE -> \" %c \" || \n"RESET, a->nodetype);
+      printf("%c", a->l->type);
 
-    //   switch(a->type) {
-    //     case 'f': // Float
-    //       fprintf(yyout, "%s: .float %4.4g \n", a->l, eval(a->r));
-    //       break;
-    //     case 'i': // Integer
-    //       fprintf(yyout, "%s: .word %4.4g \n", a->l, eval(a->r));
-    //       break;
-    //     case 's': // String
-    //       fprintf(yyout, "%s: .asciiz %4.4g \n", a->l, eval(a->r));
-    //       break;
-    //     case 'b': // Boolean
-    //       fprintf(yyout, "%s: .asciiz %4.4g \n", a->l, eval(a->r));
-    //       break;
-    //     default: 
-    //       printf("internal error: bad value type of node %c\n", a->nodetype); 
-    //       break;
-    //   }
-    //   break;
+      switch(a->l->type) {
+        case 'f': // Float
+          fprintf(yyout, "%s: .float %4.4g \n", a->l, eval(a->r));
+          break;
+        case 'i': // Integer
+          fprintf(yyout, "%s: .word %4.4g \n", a->l, eval(a->r));
+          break;
+        case 's': // String
+          fprintf(yyout, "%s: .asciiz %4.4g \n", a->l, eval(a->r));
+          break;
+        case 'b': // Boolean
+          fprintf(yyout, "%s: .asciiz %4.4g \n", a->l, eval(a->r));
+          break;
+        default: 
+          printf("internal error: bad value type of node %c\n", a->nodetype); 
+          break;
+      }
+      break;
 
     case 'I':
-      printf(TES"NEW AST NODE OF TYPE -> \" %d \" || \n  "RESET, a->nodetype);
+      printf(TES"NEW AST NODE OF TYPE -> \" %c \" || \n"RESET, a->nodetype);
+      
+      fprintf(yyout, "addi $t0, $zero, 70\n");
+      fprintf(yyout, "addi $t1, $zero, 24\n");
+      fprintf(yyout, "\nblt $t0, $t1, ifetiqueta\n");
+      fprintf(yyout, "addi $t1, $zero, 88\n\n");
+      fprintf(yyout, "ifetiqueta:\n");
+      
       //ESTAS EN EL IF
-      //sacar el simbolo de compracion
 
       break;
 
     case 'W':
-      printf(TES"NEW AST NODE OF TYPE -> \" %d \" || \n  "RESET, a->nodetype);
-      //fprintf(yyout, "\nwhile:\n");
-      //printf("%d", eval(a->l.globalSignCond));
+      printf(TES"NEW AST NODE OF TYPE -> \" %c \" || \n"RESET, a->nodetype);
 
-      //codigo mips
-      //while:
-      //comparacion de valores
-      //
+      fprintf(yyout, "addi $t0, $zero, 44\n");
+      fprintf(yyout, "addi $t1, $zero, 40\n");
+      fprintf(yyout, "\nwhile:\n");
+      fprintf(yyout, "\tblt $t0, $t1, exit\n");
+      fprintf(yyout, "\taddi $t1, $zero, 70\n");
+      fprintf(yyout, "\tj while\n");
+      fprintf(yyout, "exit:\n");
+
       break;
 
     case '+': 

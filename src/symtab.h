@@ -1,12 +1,11 @@
 
 
 struct symbolRec {
-  char *name;             /* name of symbol          */
-  int *num;               /* val of symbol          */
-  char *text;             /* text of symbol          */
-  char *type;             /* type of symbol          */
-  struct symbolRec *next;    /* link field              */
-
+  char *name;               /* name of symbol         */
+  int *num;                 /* val of symbol          */
+  char *text;               /* text of symbol         */
+  char *type;               /* type of symbol         */
+  struct symbolRec *next;   /* link field             */
 };
 
 typedef struct symbolRec symbolRec;

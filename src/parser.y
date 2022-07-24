@@ -52,7 +52,7 @@ Update_SymNum( char *sym_name, int sym_val )
 	else
 	{
     	act = updatesymNum( sym_name, sym_val); 
-    	printf( "The variable %s values now equals to %d\n", act->name, act->num );
+    	printf( "The variable %s value now equals to %d\n", act->name, act->num );
   	}
 }
 
@@ -186,8 +186,7 @@ statement: IDENTIFIER COLUMN type SEMI_COLUMN
 	$$.text = $1; 
 	$$.type = parsedType;
 	add_SymText($$.text, $$.text, $$.type);
-	// fprintf(yyout, )
-	// fprintf(yyout, "%s", newnum($$.type[0]));
+
 	$$.node = newast('D', $1, newnum($$.type[0]));
 	evalprint($$.node);	
 }
