@@ -1,6 +1,6 @@
 .vscode
 *.asm
 *.nodesm
-src/lex.yy.cc
+src/lex.yy.c
 src/y.tab.c
 src/y.tab.h
