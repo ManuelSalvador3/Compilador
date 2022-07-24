@@ -197,7 +197,7 @@ statement: IDENTIFIER COLUMN type SEMI_COLUMN
 
 type: 
 	INTEGER {
-		parsedType= " integer";
+		parsedType= "integer";
 		printf(YEL"A variable of type Integer is defined\n"RESET);
 	}
 	| FLOAT {
@@ -297,7 +297,7 @@ calc: calc ADD calc
 
 	if (!$$.valid)
 	{
-		if (($1.type == " integer") && ($3.type == " integer")) 
+		if (($1.type == "integer") && ($3.type == "integer")) 
 		{
 			$$.node = newast('+', $1.node,$3.node); 
 			evalprint($$.node);
@@ -331,7 +331,7 @@ calc: calc ADD calc
 
 	if (!$$.valid) 
 	{
-		if (($1.type == " integer") && ($3.type == " integer")) 
+		if (($1.type == "integer") && ($3.type == "integer")) 
 		{
 			$$.node = newast('-', $1.node,$3.node); 
 			evalprint($$.node);
@@ -366,7 +366,7 @@ calc: calc ADD calc
 
 	if ($$.valid == 0) 
 	{ 
-		if (($1.type == " integer") && ($3.type == " integer"))
+		if (($1.type == "integer") && ($3.type == "integer"))
 		{
 			$$.node = newast('*', $1.node,$3.node); 
 			evalprint($$.node);
@@ -408,7 +408,7 @@ calc: calc ADD calc
 
 	if (!$$.valid) 
 	{ 
-		if (($1.type == " integer") && ($3.type == " integer"))
+		if (($1.type == "integer") && ($3.type == "integer"))
 		{
 			$$.node = newast('/', $1.node,$3.node); 
 			evalprint($$.node);
@@ -501,7 +501,7 @@ calc: calc ADD calc
 { 
 	$$.node = newnum($1);
 	$$.value = $1;
-	$$.type = " integer";
+	$$.type = "integer";
 	$$.globalNumCounter = $$.globalNumCounter +1;
 	numCounter($$.globalNumCounter, $$.value );
 }
@@ -606,7 +606,7 @@ put_line: PUTLINE LEFT_P IDENTIFIER RIGHT_P SEMI_COLUMN {
 	fprintf(yyout, "%s", $3); //El resultado es el nombre de la variable
 	
 	//Con eso puedo sacar el tipo
-	//$1.type == " integer")
+	//$1.type == "integer")
 	// printf("A: %s, B: %d", s->name, s->num);
 	$$.node = newnum(s->num);
 	$$.node = newast('P', $3, $$.node);
