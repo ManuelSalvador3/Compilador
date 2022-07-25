@@ -620,14 +620,17 @@ double evalprint(struct ast *a)
       break;
 
     case 'W':
-      fprintf(yyout, "la $t1, integer1\n");
-      fprintf(yyout, "la $t2, integer2\n");
+      
+      fprintf(yyout, "la $t1, %s\n", a->l->l);
+      fprintf(yyout, "la $t2, %s\n", a->l->r);
       fprintf(yyout, "\nwhile:\n");
-      if (a->l == '<') 
+      if (a->l->number == '<') 
         fprintf(yyout, "\tblt $t1, $t2, exit\n");
       else 
         fprintf(yyout, "\tbgt $t1, $t2, exit\n");
-      fprintf(yyout, "\taddi $t2, $zero, 70\n");
+      printf("--------[%s]-----[%4.4g]", a->r->l, eval(a->r->r));
+      printf("\nType of right node in while is: %c\n", a->r->nodetype);
+      fprintf(yyout, "\taddi $t2, $zero, %4.4g\n", eval(a->r->r));
       fprintf(yyout, "\tj while\n");
       fprintf(yyout, "exit:\n");
 

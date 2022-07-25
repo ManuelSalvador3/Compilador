@@ -446,6 +446,10 @@ calc: calc ADD calc
 		$$.booleanCond = 1;
 		$$.f = $$.booleanCond;
 		$$.globalSignCond = '>';
+		
+		$$.node->l = $1.text;
+		$$.node->r = $3.text;
+		$$.node->number = $$.globalSignCond;
 
 		printf("Condition WHILE HELLO BIGGER THAN is true - Is bigger\n");
 	}
@@ -454,6 +458,9 @@ calc: calc ADD calc
 		$$.booleanCond = 0;
 		$$.f = $$.booleanCond;
 		$$.globalSignCond = '>';
+		$$.node->l = $1.text;
+		$$.node->r = $3.text;
+		$$.node->number = $$.globalSignCond;
 
 		printf("Condition BIGGER THAN is false - It's not bigger \n");
 	}
@@ -465,12 +472,19 @@ calc: calc ADD calc
 		$$.booleanCond =1;
 		$$.f = $$.booleanCond;
 		$$.globalSignCond = '<';
+		$$.node->l = $1.text;
+		$$.node->r = $3.text;
+		$$.node->number = $$.globalSignCond;
 
 		printf("Condition LESS THAN is true - It's smaller\n");
 	} else {
 		$$.booleanCond = 0;
 		$$.f = $$.booleanCond;
 		$$.globalSignCond = '<';
+		$$.node->l = $1.text;
+		$$.node->r = $3.text;
+
+		$$.node->number = $$.globalSignCond;
 
 		printf( "Condition LESS THAN is false - It's not smaller\n");
 	}
@@ -528,7 +542,8 @@ calc: calc ADD calc
 		$$.globalNumCounter = $$.globalNumCounter +1;
 		numCounter($$.globalNumCounter, $$.value );
 
-		printf("The variable %s does exist \n", $1);		
+		printf("The variable %s does exist \n", $1);	
+		$$.text = $1;	
 	}
 }
 ;
@@ -588,7 +603,7 @@ factor: INTEGERNUM
 
 while_loop: WHILE calc LOOP sentence ENDLOOP SEMI_COLUMN 
 { 
-	$$.node = newast('W', $2.globalSignCond, $4.node);
+	$$.node = newast('W', $2.node, $4.node);
 	evalprint($$.node);
 	dataOper($2.f);
 }
