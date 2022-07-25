@@ -263,7 +263,7 @@ expr: IDENTIFIER COL_EQUAL calc SEMI_COLUMN {
 
 if_sentence: IF calc THEN sentence ENDIF SEMI_COLUMN 
 {
-	$$.node = newast('I', $2.node, $4.node);
+	$$.node = newast('I', $2.globalSignCond, $4.node);
 
 	// expr: IDENTIFIER COL_EQUAL calc SEMI_COLUMN {
 	// $$.node = newast('A', $1, $3.node);
@@ -278,14 +278,14 @@ if_sentence: IF calc THEN sentence ENDIF SEMI_COLUMN
 
 | IF calc THEN sentence ELSIF calc THEN sentence ELSE sentence ENDIF SEMI_COLUMN
 { 
-	$$.node = newast('I', $2.node, $4.node);
+	$$.node = newast('I', $2.globalSignCond, $4.node);
 	dataOper($2.node);
  	textIf($$.globalSignCond,$2.f);
 }
 
 | IF calc THEN sentence ELSE sentence ENDIF SEMI_COLUMN 
 { 
-	$$.node = newast('I', $2.node, $4.node);
+	$$.node = newast('I', $2.globalSignCond, $4.node);
 	dataOper($2.node);
  	textIf($$.globalSignCond,$2.f);
 }
@@ -447,7 +447,7 @@ calc: calc ADD calc
 		$$.f = $$.booleanCond;
 		$$.globalSignCond = '>';
 
-		printf("Condition BIGGER THAN is true - Is bigger\n");
+		printf("Condition WHILE HELLO BIGGER THAN is true - Is bigger\n");
 	}
 	else 
 	{
@@ -465,7 +465,6 @@ calc: calc ADD calc
 		$$.booleanCond =1;
 		$$.f = $$.booleanCond;
 		$$.globalSignCond = '<';
-
 
 		printf("Condition LESS THAN is true - It's smaller\n");
 	} else {
@@ -587,13 +586,11 @@ factor: INTEGERNUM
 ;
 
 
-while_loop: WHILE calc LOOP sentence  ENDLOOP SEMI_COLUMN 
+while_loop: WHILE calc LOOP sentence ENDLOOP SEMI_COLUMN 
 { 
-	$$.node = newast('W', $2.node, $4.node);
+	$$.node = newast('W', $2.globalSignCond, $4.node);
 	evalprint($$.node);
 	dataOper($2.f);
-	
-	
 }
 ;
 

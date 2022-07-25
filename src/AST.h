@@ -568,17 +568,14 @@ double evalprint(struct ast *a)
       break;
 
     case 'P':
-      if((eval(a->r))){
-         // fprintf(yyout, "TEST DEL VALOR %4.4g \n",  eval(a->r));
+      if((eval(a->r))) {
         fprintf(yyout, "\nli $v0 1 \n");
         fprintf(yyout, "add $a0, $zero, %4.4g \n",eval(a->r));
         fprintf(yyout, "syscall \n");
       } else {
-        // fprintf(yyout, "TEST DEL VALOR %4.4g \n",  eval(a->r));
         fprintf(yyout, "\nli $v0 2 \n");
         fprintf(yyout, "add $a0, $zero, %4.4g \n",eval(a->r));
         fprintf(yyout, "syscall \n");
-
       }
       fprintf(yyout, "la $a0, '\\n' \n");
       fprintf(yyout, "li $v0, 11 \n");
@@ -587,21 +584,22 @@ double evalprint(struct ast *a)
       break;
 
     case 'A': // Assignment 
-      printf(TES"NEW AST NODE OF TYPE -> \" %c \" || \n"RESET, a->nodetype);
-      printf("%c", a->l->type);
 
-      switch(a->l->type) {
+      switch(a->type) {
         case 'f': // Float
-          fprintf(yyout, "%s: .float %4.4g \n", a->l, eval(a->r));
+          fprintf(yyout, "la $t0, %s \n", a->l);
+          fprintf(yyout, "addi $t0, $zero, %4.4g \n", eval(a->r));
           break;
         case 'i': // Integer
-          fprintf(yyout, "%s: .word %4.4g \n", a->l, eval(a->r));
+          fprintf(yyout, "la $t0, %s \n", a->l);
+          fprintf(yyout, "addi $t0, $zero, %4.4g \n", eval(a->r));
           break;
         case 's': // String
           fprintf(yyout, "%s: .asciiz %4.4g \n", a->l, eval(a->r));
           break;
         case 'b': // Boolean
-          fprintf(yyout, "%s: .asciiz %4.4g \n", a->l, eval(a->r));
+          fprintf(yyout, "la $t0, %s \n", a->l);
+          fprintf(yyout, "addi $t0, $zero, %4.4g \n", eval(a->r));
           break;
         default: 
           printf("internal error: bad value type of node %c\n", a->nodetype); 
@@ -610,26 +608,26 @@ double evalprint(struct ast *a)
       break;
 
     case 'I':
-      printf(TES"NEW AST NODE OF TYPE -> \" %c \" || \n"RESET, a->nodetype);
-      
-      fprintf(yyout, "addi $t0, $zero, 70\n");
-      fprintf(yyout, "addi $t1, $zero, 24\n");
-      fprintf(yyout, "\nblt $t0, $t1, ifetiqueta\n");
-      fprintf(yyout, "addi $t1, $zero, 88\n\n");
+      fprintf(yyout, "la $t1, integer1\n");
+      fprintf(yyout, "la $t2, integer2\n");
+            if (a->l == '<') 
+        fprintf(yyout, "\tblt $t1, $t2, ifetiqueta\n");
+      else 
+        fprintf(yyout, "\tbgt $t1, $t2, ifetiqueta\n");
+      fprintf(yyout, "addi $t2, $zero, 88\n\n");
       fprintf(yyout, "ifetiqueta:\n");
       
-      //ESTAS EN EL IF
-
       break;
 
     case 'W':
-      printf(TES"NEW AST NODE OF TYPE -> \" %c \" || \n"RESET, a->nodetype);
-
-      fprintf(yyout, "addi $t0, $zero, 44\n");
-      fprintf(yyout, "addi $t1, $zero, 40\n");
+      fprintf(yyout, "la $t1, integer1\n");
+      fprintf(yyout, "la $t2, integer2\n");
       fprintf(yyout, "\nwhile:\n");
-      fprintf(yyout, "\tblt $t0, $t1, exit\n");
-      fprintf(yyout, "\taddi $t1, $zero, 70\n");
+      if (a->l == '<') 
+        fprintf(yyout, "\tblt $t1, $t2, exit\n");
+      else 
+        fprintf(yyout, "\tbgt $t1, $t2, exit\n");
+      fprintf(yyout, "\taddi $t2, $zero, 70\n");
       fprintf(yyout, "\tj while\n");
       fprintf(yyout, "exit:\n");
 
@@ -637,7 +635,6 @@ double evalprint(struct ast *a)
 
     case '+': 
       globalOperacion1="add XX %lf %lf \n", eval(a->l),eval(a->r);
-      // fprintf(yyout,"syscall\n");
 
       v = eval(a->l) + eval(a->r);  
     break;
