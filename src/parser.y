@@ -52,7 +52,8 @@ Update_SymNum( char *sym_name, int sym_val )
 	else
 	{
     	act = updatesymNum( sym_name, sym_val); 
-    	printf( "The variable %s value now equals to %d\n", act->name, act->num );
+		printf( "The variable %s value now equals to %d\n", act->name, act->num );
+    	
   	}
 }
 
@@ -103,6 +104,7 @@ char *parsedType;
 		char *type;
 		char globalSignCond;
 		int value;
+		int value2;
 		double dvalue;
 		char *text;
  		int booleanCond;
@@ -157,6 +159,8 @@ func_name: IDENTIFIER
 	if (strcmp($1, getvalsymText("Name")) == 0) 
 	{
 		printf("The names at the beginning and the end are the same --> ");
+		fprintf(yyout, "li $v0, 10\n");
+		fprintf(yyout, "syscall\n");
 		printf(GRN " CORRECT\n" RESET);
 	} 
 	else
@@ -186,7 +190,6 @@ statement: IDENTIFIER COLUMN type SEMI_COLUMN
 	$$.text = $1; 
 	$$.type = parsedType;
 	add_SymText($$.text, $$.text, $$.type);
-
 	$$.node = newast('D', $1, newnum_ast($$.type[0]));
 	evalprint($$.node);	
 }
@@ -222,7 +225,7 @@ expr: IDENTIFIER COL_EQUAL calc SEMI_COLUMN {
 	$$.node->type = $$.type[0];
 
 	$$.text= $1;
-
+	$$.value = eval($3.node);
 	if (!$$.valid) 
 	{ 
 		if (!getvalsymText($$.text)) 
@@ -263,11 +266,12 @@ expr: IDENTIFIER COL_EQUAL calc SEMI_COLUMN {
 
 if_sentence: IF calc THEN sentence ENDIF SEMI_COLUMN 
 {
-	$$.node = newast('I', $2.globalSignCond, $4.node);
-
+	//$$.node = newast('I', $2.globalSignCond, $4.node);
+	$$.node = newast('I', $2.node, $4.node);
 	// expr: IDENTIFIER COL_EQUAL calc SEMI_COLUMN {
 	// $$.node = newast('A', $1, $3.node);
 	// $$.node->type = $$.type[0];
+	//fprintf(yyout, "%s", $2);
 
 	// $$.node
 	// fprintf(yyout, "\n%s\n", $$.type[0]);
@@ -296,9 +300,19 @@ calc: calc ADD calc
 
 	if (!$$.valid)
 	{
-		if (($1.type == "integer") && ($3.type == "integer")) 
+
+// if ($1.value > $3.value) {
+// 		$$.booleanCond = 1;
+// 		$$.f = $$.booleanCond;
+// 		$$.globalSignCond = '>';
+// 		$$.node->l = $1.text;
+// 		$$.node->r = $3.text;
+// 		$$.node->number = $$.globalSignCond;
+
+		if (($1.type == "integer") && ($3.type == "integer"))  
 		{
 			$$.node = newast('+', $1.node,$3.node); 
+			//fprintf(yyout, "TEST TEST TEST %d", $1.value);
 			evalprint($$.node);
 			$$.type = $1.type;
 			printf(YEL"ADD ON of %s type \n" RESET, $$.type);
@@ -330,7 +344,7 @@ calc: calc ADD calc
 
 	if (!$$.valid) 
 	{
-		if (($1.type == "integer") && ($3.type == "integer")) 
+		if (($1.type == "integer") && ($3.type == "integer"))  
 		{
 			$$.node = newast('-', $1.node,$3.node); 
 			evalprint($$.node);
@@ -446,11 +460,12 @@ calc: calc ADD calc
 		$$.booleanCond = 1;
 		$$.f = $$.booleanCond;
 		$$.globalSignCond = '>';
-		
 		$$.node->l = $1.text;
 		$$.node->r = $3.text;
 		$$.node->number = $$.globalSignCond;
-
+		// $$.value = $1.value;
+		// $$.value2 = $3.value;
+		// $$.text = $1.text;
 		printf("Condition WHILE HELLO BIGGER THAN is true - Is bigger\n");
 	}
 	else 
@@ -481,10 +496,6 @@ calc: calc ADD calc
 		$$.booleanCond = 0;
 		$$.f = $$.booleanCond;
 		$$.globalSignCond = '<';
-		$$.node->l = $1.text;
-		$$.node->r = $3.text;
-
-		$$.node->number = $$.globalSignCond;
 
 		printf( "Condition LESS THAN is false - It's not smaller\n");
 	}
@@ -498,6 +509,10 @@ calc: calc ADD calc
 		$$.booleanCond = 1;
 		$$.f = $$.booleanCond;
 		$$.globalSignCond = '=';
+		$$.node->l = $1.text;
+		$$.node->r = $3.text;
+		$$.node->number = $$.globalSignCond;
+		
 	}
 	else
 	{
@@ -543,7 +558,7 @@ calc: calc ADD calc
 		numCounter($$.globalNumCounter, $$.value );
 
 		printf("The variable %s does exist \n", $1);	
-		$$.text = $1;	
+		$$.text = $1;			
 	}
 }
 ;
@@ -597,7 +612,8 @@ factor: INTEGERNUM
 	| REALNUM 		
 	| IDENTIFIER 	
 	| TRUE 			
-	| FALSE 		
+	| FALSE 
+
 ;
 
 
@@ -605,7 +621,13 @@ while_loop: WHILE calc LOOP sentence ENDLOOP SEMI_COLUMN
 { 
 	$$.node = newast('W', $2.node, $4.node);
 	evalprint($$.node);
-	dataOper($2.f);
+	
+	// dataOper($2.f);
+	// fprintf(yyout,"\n\nVariable: %s\n", $4.text);
+	// fprintf(yyout,"Valor: %d\n\n", $4.value);
+	// fprintf(yyout, "%d\n", $2.value);
+	// fprintf(yyout, "%d\n", $2.value2);
+	// fprintf(yyout, "%s\n", $2.text);
 }
 ;
 
@@ -613,27 +635,36 @@ put_line: PUTLINE LEFT_P IDENTIFIER RIGHT_P SEMI_COLUMN {
 	// printf("Test de que funciona el PUT LINE");
 	symbolRec *s;
    	s = getsymNum ($3,NULL);
-	//Saca el tipo de datos que es
-	fprintf(yyout, "%s", $3); //El resultado es el nombre de la variable
 	
 	//Con eso puedo sacar el tipo
 	//$1.type == "integer")
+	// char * test = s->name;
+	
+	$$.text =  s->name;
 	// printf("A: %s, B: %d", s->name, s->num);
 	$$.node = newnum(s->num);
-	$$.node = newast('P', $3, $$.node);
+	
+	$$.node = newast('P', $3, $$.text);
 	evalprint($$.node);
 	
 	//Hacer la mierda necesaria 
+	//fprintf(yyout, "\n\nThe name of the variable is: %s\n\n", $$.text);
+	//fprintf(yyout, "\n\nSAludos: %s\n\n", test);
 }
 
 for_loop: FOR IDENTIFIER IN iter_range LOOP sentence ENDLOOP SEMI_COLUMN {
-	$$.node = newast('W', $2, $6.node);
+	//$$.node = newast('W', $2, $6.node);
 
 	printf("BUCLE FOOR\n");
+	//fprintf(yyout, "%d", $6);
 }
 ;
 
-iter_range: factor RANGE factor 
+iter_range: factor RANGE factor {
+	// fprintf(yyout, "%s", $1.value);
+	// $$.node = newast('W', $1.value, $3.value);
+
+}
 ;
 
 

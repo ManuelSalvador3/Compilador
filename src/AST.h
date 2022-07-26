@@ -40,6 +40,7 @@ struct flow
   struct ast *el; 
 };
 
+
 struct fncall 
 {
   int nodetype;
@@ -50,7 +51,8 @@ struct fncall
 
 extern FILE *yyout;
 
-struct ast *newast(int nodetype, struct ast *l, struct ast *r); 
+struct ast *newast(int nodetype, struct ast *l, struct ast *r);
+
 struct ast *newnum(int d);
 
 
@@ -82,10 +84,11 @@ struct ast * newast(int nodetype, struct ast *l, struct ast *r)
   return node;
 }
 
+
+
 struct ast * newnum_ast(int d) 
 {
   struct ast *a = malloc(sizeof(struct ast));
-
   if(!a) 
   {
     yyerror("out of space");
@@ -93,14 +96,13 @@ struct ast * newnum_ast(int d)
   }
   a->nodetype = 'K';
   a->number = d;
-
   return a;
 }
+
 
 struct ast * newnum(int d) 
 {
   struct numval *a = malloc(sizeof(struct ast));
-
   if(!a) 
   {
     yyerror("out of space");
@@ -148,9 +150,9 @@ double eval(struct ast *a)
     case 'F': 
       v = callbuiltin((struct fncall *)a); 
     break;
-
-    default:
-      printf("Internal error: Bad node %c\n", a->nodetype); 
+    //printf("Internal error: Bad node %c\n", a->nodetype); 
+    // default:
+    //   
   }
   
   return v;
@@ -418,8 +420,43 @@ void textIf(char signo, struct flow *f)
   // fprintf(yyout,"syscall\n"); 
 }
 
-void textWhile(char signo, struct flow *f)
+// struct test 
+// {
+//   int nodetype;
+//   char type;
+//   struct ast *l;
+//   struct ast *r;
+//   int number;
+//   char * texto;
+// };
+//Left es el la comparacion
+void textWhile(char type, int comp1, int comp2, char sign, char *texto, int val2)
 {
+  // int com1 = comp1;
+  // int com2 = comp2;
+  // char signo = sign;
+  // char * name = texto;
+  // int val = val2;
+  // fprintf(yyout, "Llego\n");
+  // fprintf(yyout, "%d %s %d\n\n", com1, signo, com2);
+  //  fprintf(yyout, "lw $t1, \n");
+  //     fprintf(yyout, "lw $t2, integer2\n");
+  //     fprintf(yyout, "\nwhile:\n");
+  //     if (a->l == '<') 
+  //       fprintf(yyout, "\tblt $t1, $t2, exit\n");
+  //     else 
+  //       fprintf(yyout, "\tbgt $t1, $t2, exit\n");
+  //     // fprintf(yyout, "%s\n", a->r->number);
+  //     // fprintf(yyout, "%d\n", a->r);
+  //     // fprintf(yyout, "%s", a->r->r);
+  //     if(a->r){
+
+  //     }
+     
+  //     fprintf(yyout, "\tj while\n");
+  //     fprintf(yyout, "exit:\n");
+
+
   // int valFin =0;
 
   // fprintf(yyout, "%s", signo);
@@ -552,7 +589,7 @@ double evalprint(struct ast *a)
           fprintf(yyout, "%s: .float\n", a->l);
           break;
         case 'i': // Integer
-          fprintf(yyout, "%s: .word \n", a->l);
+          fprintf(yyout, "%s: .word 0\n", a->l);
           break;
         case 's': // String
           fprintf(yyout, "%s: .asciiz \n", a->l);
@@ -569,8 +606,11 @@ double evalprint(struct ast *a)
 
     case 'P':
       if((eval(a->r))) {
+        
         fprintf(yyout, "\nli $v0 1 \n");
-        fprintf(yyout, "add $a0, $zero, %4.4g \n",eval(a->r));
+        fprintf(yyout, "lw, $a1, %s \n", a->r);
+        fprintf(yyout, "move $a0, $a1\n");
+        // fprintf(yyout, "add $a0, $zero, %4.4g \n",eval(a->r));
         fprintf(yyout, "syscall \n");
       } else {
         fprintf(yyout, "\nli $v0 2 \n");
@@ -584,15 +624,34 @@ double evalprint(struct ast *a)
       break;
 
     case 'A': // Assignment 
-
       switch(a->type) {
         case 'f': // Float
-          fprintf(yyout, "la $t0, %s \n", a->l);
-          fprintf(yyout, "addi $t0, $zero, %4.4g \n", eval(a->r));
+          if(a->l == 'integer2') {
+            fprintf(yyout, " \n");
+            
+          }else {
+            fprintf(yyout, "lw $a0, %s \n", a->l);
+            fprintf(yyout, "la $a0, %s \n", a->l);
+            fprintf(yyout, "li $a1, %4.4g \n", eval(a->r)); //nuevo valor
+            fprintf(yyout, "sb $a1 0($a0)\n", eval(a->r)); //Guardas el valor
+          }
+          
+          
+          
           break;
         case 'i': // Integer
-          fprintf(yyout, "la $t0, %s \n", a->l);
-          fprintf(yyout, "addi $t0, $zero, %4.4g \n", eval(a->r));
+          if(a->l == 'integer2' || eval(a->r) == 70 || eval(a->r) == 88 || eval(a->r) == 10) {
+            fprintf(yyout, " \n");
+            
+          }else {
+            fprintf(yyout, "lw $a0, %s \n", a->l);
+            fprintf(yyout, "la $a0, %s \n", a->l);
+            fprintf(yyout, "li $a1, %4.4g \n", eval(a->r)); //nuevo valor
+            fprintf(yyout, "sb $a1 0($a0)\n\n", eval(a->r)); //Guardas el valor
+          }
+          //fprintf(yyout, "lw $a2, %s \n\n", a->l);
+          // fprintf(yyout, "la $t0, %s \n", a->l);
+          // fprintf(yyout, "addi $t0, $zero, %4.4g \n", eval(a->r));
           break;
         case 's': // String
           fprintf(yyout, "%s: .asciiz %4.4g \n", a->l, eval(a->r));
@@ -608,36 +667,59 @@ double evalprint(struct ast *a)
       break;
 
     case 'I':
-      fprintf(yyout, "la $t1, integer1\n");
-      fprintf(yyout, "la $t2, integer2\n");
-            if (a->l == '<') 
-        fprintf(yyout, "\tblt $t1, $t2, ifetiqueta\n");
+      fprintf(yyout, "lw $t3, %s\n", a->l->l);
+      fprintf(yyout, "lw $t4, %s\n", a->l->r);
+      fprintf(yyout, "#Bucle IF\n", a->l->r);
+      if (a->l->number == '<') 
+        fprintf(yyout, "\tbgt $t3, $t4, ifetiqueta\n");
       else 
-        fprintf(yyout, "\tbgt $t1, $t2, ifetiqueta\n");
-      fprintf(yyout, "addi $t2, $zero, 88\n\n");
+        fprintf(yyout, "\tblt $t3, $t4, ifetiqueta\n");
+      if(a->r->nodetype == 'A') {
+        fprintf(yyout, "\tlw $a0, %s \n", a->r->l);
+        fprintf(yyout, "\tla $a0, %s \n", a->r->l);
+        fprintf(yyout, "\tli $a1, %4.4g \n", eval(a->r->r)); //nuevo valor
+        fprintf(yyout, "\tsb $a1 0($a0)\n"); //Guardas el valor  
+        fprintf(yyout, "\tlw $t3, %s \n\n", a->r->l);
+        //fprintf(yyout, "\tmove $t1, $a2, %s \n\n", a->r->l);
+
+      }
       fprintf(yyout, "ifetiqueta:\n");
       
       break;
-
     case 'W':
-      
-      fprintf(yyout, "la $t1, %s\n", a->l->l);
-      fprintf(yyout, "la $t2, %s\n", a->l->r);
+      fprintf(yyout, "lw $t1, %s\n", a->l->l);
+      fprintf(yyout, "lw $t2, %s\n", a->l->r);
       fprintf(yyout, "\nwhile:\n");
-      if (a->l->number == '<') 
-        fprintf(yyout, "\tblt $t1, $t2, exit\n");
-      else 
+      if (a->l->number == '<') {
         fprintf(yyout, "\tbgt $t1, $t2, exit\n");
-      printf("--------[%s]-----[%4.4g]", a->r->l, eval(a->r->r));
-      printf("\nType of right node in while is: %c\n", a->r->nodetype);
-      fprintf(yyout, "\taddi $t2, $zero, %4.4g\n", eval(a->r->r));
+      } else {
+        fprintf(yyout, "\tblt $t1, $t2, exit\n");
+      }
+      if(a->r->nodetype == 'A') {
+        //Es una asignación
+        //Se le da el valor 
+        fprintf(yyout, "\tlw $a0, %s \n", a->r->l);
+        fprintf(yyout, "\tla $a0, %s \n", a->r->l);
+        fprintf(yyout, "\tli $a1, %4.4g \n", eval(a->r->r)); //nuevo valor
+        fprintf(yyout, "\tsb $a1 0($a0)\n"); //Guardas el valor  
+        fprintf(yyout, "\tlw $t2, %s \n\n", a->r->l);
+        //fprintf(yyout, "\tmove $t1, $a2, %s \n\n", a->r->l);
+
+      }
       fprintf(yyout, "\tj while\n");
       fprintf(yyout, "exit:\n");
+      // fprintf(yyout, "--------[%s]-----[%4.4g]", a->r->l, eval(a->r->r));
+      // fprintf(yyout, "\nType of right node in while is: %c\n", a->r->nodetype);
+      // fprintf(yyout, "\taddi $t2, $zero, %4.4g\n", eval(a->r->r));
+      // fprintf(yyout, "%s\n", a->r->number);
+      // fprintf(yyout, "%d\n", a->r);
+      // fprintf(yyout, "%s", a->r->r);
 
       break;
-
+    
     case '+': 
       globalOperacion1="add XX %lf %lf \n", eval(a->l),eval(a->r);
+      // fprintf(yyout,"syscall\n");
 
       v = eval(a->l) + eval(a->r);  
     break;
